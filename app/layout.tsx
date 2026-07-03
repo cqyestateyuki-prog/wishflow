@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next';
 import { Fraunces, Work_Sans } from 'next/font/google';
 import Nav from '../components/Nav';
 import AuthCloudSync from '../components/AuthCloudSync';
+import PwaRegister from '../components/PwaRegister';
 import { LanguageProvider } from '../components/LanguageProvider';
 
 const fraunces = Fraunces({
@@ -38,6 +39,11 @@ export const metadata: Metadata = {
     title: 'Wishflow',
     statusBarStyle: 'default',
   },
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/icons/icon.svg',
+    apple: '/icons/icon-180.png',
+  },
 };
 
 export const viewport: Viewport = {
@@ -53,6 +59,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${fraunces.variable} ${workSans.variable}`}>
         <div className="ambient" />
         <LanguageProvider>
+          <PwaRegister />
           <AuthCloudSync />
           <Nav />
           <main>{children}</main>

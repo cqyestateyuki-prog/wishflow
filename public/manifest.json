@@ -1,0 +1,33 @@
+{
+  "name": "Wishflow · Life-long Wish Navigation",
+  "short_name": "Wishflow",
+  "description": "Leave your wish here. No streaks, no deadlines, no pressure — it will wait for you through every season.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FAF9F7",
+  "theme_color": "#FAF9F7",
+  "categories": ["lifestyle", "health", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

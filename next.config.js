@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 减少文件监视器的数量，避免 EMFILE 错误
+  // 减少文件监视器的数量，避免 EMFILE 错误（仅开发环境）
   webpack: (config, { dev, isServer }) => {
     if (dev && !isServer) {
       config.watchOptions = {
@@ -9,6 +9,20 @@ const nextConfig = {
       }
     }
     return config
+  },
+  // CORS for the API so the Capacitor shell (capacitor://localhost) can call it.
+  // Auth is Bearer-token based (no cookies), so '*' is safe here.
+  async headers() {
+    return [
+      {
+        source: '/api/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET, POST, OPTIONS' },
+          { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization' },
+        ],
+      },
+    ]
   },
 }
 
