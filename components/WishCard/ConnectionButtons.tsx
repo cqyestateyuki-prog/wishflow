@@ -8,6 +8,7 @@
 
 import { useLanguage } from '@/components/LanguageProvider';
 import { CONNECTION_LEVELS } from '@/lib/constants';
+import { gentleTap } from '@/lib/haptics';
 import { MoonNew, MoonCrescent, MoonFull } from '../Icons';
 import styles from './WishCard.module.css';
 
@@ -26,6 +27,7 @@ export default function ConnectionButtons({
 
   const handleClick = (e: React.MouseEvent, levelId: string) => {
     e.stopPropagation(); // Prevent parent onClick
+    void gentleTap();
     onSelect(levelId);
   };
 

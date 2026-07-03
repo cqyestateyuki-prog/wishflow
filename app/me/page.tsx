@@ -15,6 +15,7 @@ import { useLocalFragments } from '@/hooks/useLocalFragments';
 import { exportAllData, clearAllLocalData } from '@/lib/localStore';
 import { supabase } from '@/lib/supabase/client';
 import { formatLastSync, getLastSyncError, getLastSyncTime, hasUnsyncedData, syncAllData, SyncStatus } from '@/lib/syncData';
+import { apiUrl } from '@/lib/apiBase';
 
 export default function MePage() {
   const { language, setLanguage } = useLanguage();
@@ -116,7 +117,7 @@ export default function MePage() {
         setDeleting(false);
         return;
       }
-      const res = await fetch('/api/account/delete', {
+      const res = await fetch(apiUrl('/api/account/delete'), {
         method: 'POST',
         headers: { Authorization: `Bearer ${session.access_token}` },
       });

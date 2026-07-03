@@ -14,6 +14,7 @@ import { wishStore } from '@/lib/localStore';
 import { TimeScope, TargetTime, WishDomain, WishMood } from '@/lib/types';
 import { ClassificationResult } from '@/lib/ai';
 import { DOMAINS } from '@/lib/constants';
+import { apiUrl } from '@/lib/apiBase';
 
 type Step = 'input' | 'generating' | 'preview' | 'saved';
 
@@ -57,7 +58,7 @@ export default function TryPage() {
   // Call AI classification + SVG generation API
   const classifyAndGenerateSVG = useCallback(async (desc: string): Promise<ClassificationWithSVG> => {
     try {
-      const response = await fetch('/api/classify', {
+      const response = await fetch(apiUrl('/api/classify'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

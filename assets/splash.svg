@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2732 2732">
+  <rect width="2732" height="2732" fill="#FAF9F7"/>
+  <g transform="translate(1046, 1046) scale(1.25)">
+
+
+  <!-- guiding star -->
+  <circle cx="352" cy="132" r="10" fill="#6B5C8E" opacity="0.85"/>
+  <circle cx="352" cy="132" r="22" fill="#6B5C8E" opacity="0.12"/>
+
+  <!-- sail: one flowing curve off a slightly tilted mast -->
+  <path d="M250 190 C 254 216, 252 246, 249 272"
+        stroke="#2E2B33" stroke-width="15" fill="none" stroke-linecap="round"/>
+  <path d="M252 192 C 302 210, 314 246, 262 270 C 258 271, 253 272, 249 272"
+        stroke="#2E2B33" stroke-width="15" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- hull: a wobbly open smile -->
+  <path d="M176 296 C 186 330, 226 338, 258 336 C 292 334, 322 324, 334 294"
+        stroke="#2E2B33" stroke-width="16" fill="none" stroke-linecap="round"/>
+
+  <!-- water: the wish-purple current, trembling -->
+  <path d="M78 386 C 122 370, 152 400, 200 388 C 244 377, 270 398, 314 390 C 356 382, 390 398, 434 382"
+        stroke="#6B5C8E" stroke-width="17" fill="none" stroke-linecap="round"/>
+  <path d="M120 436 C 160 424, 196 444, 244 434 C 288 425, 322 442, 382 430"
+        stroke="#C4B8E0" stroke-width="12" fill="none" stroke-linecap="round"/>
+
+
+  </g>
+</svg>

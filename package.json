@@ -8,7 +8,8 @@
     "dev:clean": "sh scripts/dev.sh",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "build:cap": "node scripts/build-capacitor.js"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +17,13 @@
   "type": "commonjs",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.74.0",
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/cli": "^8.4.1",
+    "@capacitor/core": "^8.4.1",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/ios": "^8.4.1",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.2",
     "@supabase/auth-helpers-nextjs": "^0.15.0",
     "@supabase/supabase-js": "^2.95.3",
     "next": "^14.2.5",
