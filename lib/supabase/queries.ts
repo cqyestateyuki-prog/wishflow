@@ -1,6 +1,10 @@
 import { supabase } from './client';
 import type { Wish, Connection, Fragment } from '../types';
 
+type ConnectionWithWish = Connection & {
+  wishes?: { id: string; title: string };
+};
+
 export async function fetchWishes() {
   const { data, error } = await supabase
     .from('wishes')
@@ -53,11 +57,17 @@ export async function deleteWish(id: string) {
 export async function fetchConnections(limit = 50) {
   const { data, error } = await supabase
     .from('connections')
-    .select('id, level, mood, note, connected_at, created_at, wish_id, wishes ( id, title )')
+    .select('id, user_id, level, mood, note, connected_at, created_at, wish_id, wishes ( id, title )')
     .order('connected_at', { ascending: false })
     .limit(limit);
   if (error) throw error;
-  return (data ?? []) as Array<Connection & { wishes?: { id: string; title: string } }>
+  return ((data ?? []) as unknown[]).map((item) => {
+    const row = item as Connection & { wishes?: { id: string; title: string } | { id: string; title: string }[] };
+    return {
+      ...row,
+      wishes: Array.isArray(row.wishes) ? row.wishes[0] : row.wishes,
+    };
+  }) as ConnectionWithWish[];
 }
 
 export async function addConnection(payload: {

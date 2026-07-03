@@ -1,6 +1,7 @@
 import './globals.css';
 import { Fraunces, Work_Sans } from 'next/font/google';
 import Nav from '../components/Nav';
+import AuthCloudSync from '../components/AuthCloudSync';
 import { LanguageProvider } from '../components/LanguageProvider';
 
 const fraunces = Fraunces({
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${fraunces.variable} ${workSans.variable}`}>
         <div className="ambient" />
         <LanguageProvider>
+          <AuthCloudSync />
           <Nav />
           <main>{children}</main>
         </LanguageProvider>

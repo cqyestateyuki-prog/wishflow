@@ -4,7 +4,8 @@
   "description": "",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3040",
+    "dev:clean": "sh scripts/dev.sh",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -14,7 +15,9 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@supabase/supabase-js": "^2.49.0",
+    "@anthropic-ai/sdk": "^0.74.0",
+    "@supabase/auth-helpers-nextjs": "^0.15.0",
+    "@supabase/supabase-js": "^2.95.3",
     "next": "^14.2.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

@@ -8,6 +8,8 @@ const STORAGE_KEY = 'wishflow:lang';
 type LanguageContextValue = {
   lang: Language;
   setLang: (lang: Language) => void;
+  language: Language; // Alias for consistency
+  setLanguage: (lang: Language) => void; // Alias for consistency
 };
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
@@ -29,7 +31,12 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const value = useMemo(() => ({ lang, setLang }), [lang]);
+  const value = useMemo(() => ({ 
+    lang, 
+    setLang,
+    language: lang, // Alias
+    setLanguage: setLang, // Alias
+  }), [lang]);
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }

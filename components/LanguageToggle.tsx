@@ -10,7 +10,7 @@ export default function LanguageToggle() {
       className="btn"
       onClick={() => setLang(lang === 'en' ? 'zh' : 'en')}
       aria-label="Toggle language"
-      style={{ padding: '6px 10px', borderRadius: 999 }}
+      style={{ padding: '6px 12px', borderRadius: 999, fontSize: 14 }}
     >
       {lang === 'en' ? '中文' : 'EN'}
     </button>

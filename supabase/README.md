@@ -10,7 +10,7 @@ Enable:
 - Google OAuth
 
 For Google OAuth, set the redirect URL to:
-- `http://localhost:3000/overview` (local)
+- `http://localhost:3040/overview` (local)
 - `https://your-domain.com/overview` (production)
 
 ## 3. Database schema

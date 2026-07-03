@@ -2,16 +2,16 @@ export type Language = 'en' | 'zh';
 
 export const translations = {
   nav_overview: {
-    en: 'Star Map',
-    zh: '星图'
+    en: 'Universe',
+    zh: '愿力宇宙'
   },
   nav_daily: {
-    en: 'River',
-    zh: '河流'
+    en: 'Today',
+    zh: '今日连接'
   },
   nav_wishes: {
-    en: 'Wish Cards',
-    zh: '愿力卡'
+    en: 'Collection',
+    zh: '愿望收藏'
   },
   nav_log: {
     en: 'Logs',
@@ -38,8 +38,8 @@ export const translations = {
     zh: '让愿望，慢慢成形。'
   },
   hero_subtitle: {
-    en: 'A life-long wish navigation system for sensitive, non-structured minds. No streaks. No pressure. Only gentle connection.',
-    zh: '为高敏感、抗规划的人设计的一生级愿望导航系统。不打卡，不催促，只保留温柔连接。'
+    en: 'A wish navigation system designed for sensitive souls and P-type explorers. From your present wishes to your life-long blueprints—every stage of your dreams is gently preserved.',
+    zh: '为每个高敏感的灵魂与P型探索者设计的愿望导航系统。从你此刻的小愿望到几十岁的长期蓝图，每一个阶段的人生梦想，都能被温柔保存。'
   },
   hero_cta_primary: {
     en: 'Create my first wish',
@@ -50,8 +50,8 @@ export const translations = {
     zh: '看看它怎么起作用'
   },
   hero_micro: {
-    en: 'Leave a wish. The system keeps the connection for you.',
-    zh: '你只要留下愿望，连接会由系统照看。'
+    en: 'No streaks, no persistence required. Just leave your wish, the system takes care of the rest.',
+    zh: '无需打卡，无需坚持。你只需要留下愿望，其余交给系统。'
   },
   section_problem_title: {
     en: 'Why this exists',
@@ -62,12 +62,12 @@ export const translations = {
     zh: '世界太吵时，愿望很容易消失。'
   },
   section_problem_2: {
-    en: 'Traditional goal apps feel like pressure.',
-    zh: '传统目标工具很容易让人窒息。'
+    en: 'Traditional tools chase efficiency and rules. We guard your feelings and heart.',
+    zh: '传统工具追逐效率和规律，这里只守护你的感受和心。'
   },
   section_problem_3: {
-    en: 'We need a place to keep long wishes alive.',
-    zh: '我们需要一个地方，保管长期愿望。'
+    en: 'Let us feel, connect, and manifest wishes together.',
+    zh: '让我们一起感受，连接和显化愿望。'
   },
   section_card_title: {
     en: 'Wish Card: keep a relationship, not a task.',
@@ -134,8 +134,8 @@ export const translations = {
     zh: '星图'
   },
   daily_title: {
-    en: 'River',
-    zh: '河流'
+    en: 'Today',
+    zh: '今日'
   },
   wishes_title: {
     en: 'Wish Cards',

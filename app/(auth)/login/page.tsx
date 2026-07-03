@@ -25,7 +25,7 @@ export default function LoginPage() {
     if (error) {
       setStatus(error.message);
     } else {
-      setStatus(lang === 'en' ? 'Signed in.' : '已登录。');
+      window.location.href = '/wishes';
     }
   }
 

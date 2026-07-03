@@ -1,12 +1,31 @@
+// Time scope for wishes
+export type TimeScope = 'short' | 'long';
+
+// Target time for achieving the wish
+export type TargetTime = 'weeks' | 'months' | 'years';
+
+// Mood types for SVG generation
+export type WishMood = '温暖' | '激励' | '平静' | '期待' | '自由';
+
+// Domain types
+export type WishDomain = '家人' | '事业' | '钱' | '健康' | '创造' | '生活' | '爱';
+
 export type Wish = {
   id: string;
   user_id: string;
-  title: string;
-  domain: string | null;
-  stage: string | null;
-  will_source: string | null;
-  end_scene: string | null;
-  line_seed: string | null;
+  title: string;                          // Short title (can be auto-generated from description)
+  description: string | null;             // Full wish description
+  domain: string | null;                  // Auto-classified domain
+  stage: string | null;                   // Life stage
+  will_source: string | null;             // Will source
+  end_scene: string | null;               // End vision
+  time_scope: TimeScope | null;           // Short-term or long-term
+  target_time: TargetTime | null;         // Target completion time
+  svg_pattern: string | null;             // SVG pattern identifier (legacy)
+  svg_data: string | null;                // AI-generated SVG string (full <svg>...</svg>)
+  keywords: string[] | null;              // AI-extracted keywords for SVG
+  mood: WishMood | null;                  // Mood for SVG animation
+  line_seed: string | null;               // Seed for consistent SVG generation
   pinned: boolean | null;
   last_connected_at: string | null;
   last_level: string | null;
