@@ -7,10 +7,20 @@
 'use client';
 
 import { LocalWish } from '@/lib/localStore';
-import { WISH_WHISPERS, MINIMUM_CONNECTIONS, CONNECTION_LEVELS } from '@/lib/mockData';
+import { getWishWhisper, getMinimumConnection, CONNECTION_LEVELS, STAGES } from '@/lib/constants';
 import { useLanguage } from '@/components/LanguageProvider';
 import { ConnectionIcon } from '../Icons';
 import styles from './WishMap.module.css';
+
+// Translate stage based on language
+function getStageLabel(stage: string | null, language: string): string {
+  if (!stage) return '';
+  if (language === 'en') {
+    const stageEntry = STAGES.find(s => s.label === stage);
+    return stageEntry?.labelEn || stage;
+  }
+  return stage;
+}
 
 type MapTooltipProps = {
   wish: LocalWish | null;
@@ -24,8 +34,8 @@ export default function MapTooltip({ wish, position, visible }: MapTooltipProps)
   if (!wish || !visible) return null;
 
   const levelInfo = CONNECTION_LEVELS.find(l => l.id === wish.last_level) || CONNECTION_LEVELS[0];
-  const whisper = WISH_WHISPERS[wish.id] || '你可以慢慢来。';
-  const minConnection = MINIMUM_CONNECTIONS[wish.id] || '看一眼意象图，说一句"我还在"。';
+  const whisper = getWishWhisper(wish, language as 'en' | 'zh');
+  const minConnection = getMinimumConnection(wish.domain, language as 'en' | 'zh');
 
   return (
     <div
@@ -37,7 +47,7 @@ export default function MapTooltip({ wish, position, visible }: MapTooltipProps)
     >
       <b className={styles.tooltipTitle}>{wish.title}</b>
       <div className={styles.tooltipMeta} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-        {language === 'zh' ? '阶段' : 'Stage'}: {wish.stage} · <ConnectionIcon levelId={levelInfo.id} size={12} /> {language === 'zh' ? levelInfo.label : levelInfo.labelEn}
+        {language === 'zh' ? '阶段' : 'Stage'}: {getStageLabel(wish.stage, language)} · <ConnectionIcon levelId={levelInfo.id} size={12} /> {language === 'zh' ? levelInfo.label : levelInfo.labelEn}
       </div>
       {wish.end_scene && (
         <div className={styles.tooltipMeta}>{wish.end_scene}</div>

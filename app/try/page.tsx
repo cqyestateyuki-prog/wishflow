@@ -8,15 +8,26 @@
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/components/LanguageProvider';
+import { logger } from '@/lib/logger';
 import { MoonNew, MoonCrescent, MoonFull } from '@/components/Icons';
 import { wishStore } from '@/lib/localStore';
 import { TimeScope, TargetTime, WishDomain, WishMood } from '@/lib/types';
 import { ClassificationResult } from '@/lib/ai';
+import { DOMAINS } from '@/lib/constants';
 
 type Step = 'input' | 'generating' | 'preview' | 'saved';
 
 // Generation progress steps
 type GenerationStep = 'analyzing' | 'classifying' | 'generating' | 'done';
+
+// Helper to translate domain to English
+function getDomainLabel(domain: string, language: string): string {
+  if (language === 'en') {
+    const domainEntry = DOMAINS.find(d => d.label === domain);
+    return domainEntry?.labelEn || domain;
+  }
+  return domain;
+}
 
 // Extended classification result with SVG
 type ClassificationWithSVG = ClassificationResult & {
@@ -57,18 +68,18 @@ export default function TryPage() {
       
       if (!response.ok) {
         const data = await response.json();
-        console.error('API Error:', data);
+        logger.error('API Error:', data);
         throw new Error(data.error || 'Classification failed');
       }
       
       return await response.json();
     } catch (err) {
-      console.error('Classification error:', err);
+      logger.error('Classification error:', err);
       
       // Show user-friendly error message
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       if (errorMessage.includes('credit balance') || errorMessage.includes('502')) {
-        console.warn('AI service temporarily unavailable, using fallback');
+        logger.debug('AI service temporarily unavailable, using fallback');
       }
       
       // Fallback: return default classification without SVG
@@ -448,7 +459,7 @@ export default function TryPage() {
             {/* Tags - show only domain and one keyword */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center', marginBottom: 20 }}>
               <span className="badge" style={{ background: 'rgba(107, 92, 142, 0.15)', color: 'var(--wish)', fontWeight: 600 }}>
-                {classification.domain}
+                {getDomainLabel(classification.domain, language)}
               </span>
               {classification.keywords.length > 0 && (
                 <span className="badge" style={{ background: 'rgba(230, 225, 240, 0.5)' }}>

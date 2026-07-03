@@ -268,12 +268,43 @@ export async function syncAllData(): Promise<SyncResult> {
     syncStore.setLastSync(new Date().toISOString());
 
     result.status = 'success';
+    clearSyncError();
   } catch (err: any) {
     result.status = 'error';
     result.error = err.message || 'Sync failed';
+    recordSyncError(result.error ?? 'Sync failed');
   }
 
   return result;
+}
+
+// ---- Sync failure surface ----
+// Auto-sync runs fire-and-forget on login; failures used to vanish silently.
+// We record the last failure so /me can show a gentle, non-alarming notice.
+
+const SYNC_ERROR_KEY = 'wishflow:last-sync-error';
+
+export type SyncErrorRecord = { message: string; at: string };
+
+function recordSyncError(message: string) {
+  try {
+    localStorage.setItem(SYNC_ERROR_KEY, JSON.stringify({ message, at: new Date().toISOString() }));
+  } catch { /* storage unavailable — nothing to surface */ }
+}
+
+function clearSyncError() {
+  try {
+    localStorage.removeItem(SYNC_ERROR_KEY);
+  } catch { /* ignore */ }
+}
+
+export function getLastSyncError(): SyncErrorRecord | null {
+  try {
+    const raw = localStorage.getItem(SYNC_ERROR_KEY);
+    return raw ? (JSON.parse(raw) as SyncErrorRecord) : null;
+  } catch {
+    return null;
+  }
 }
 
 /**

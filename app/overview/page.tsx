@@ -15,12 +15,32 @@ import WishDetail from '@/components/WishCard/WishDetail';
 import { useLocalWishes } from '@/hooks/useLocalWishes';
 import { useLanguage } from '@/components/LanguageProvider';
 import { LocalWish, clearSampleData } from '@/lib/localStore';
-import { DOMAINS, STAGES, CONNECTION_LEVELS } from '@/lib/mockData';
+import { DOMAINS, STAGES, CONNECTION_LEVELS } from '@/lib/constants';
 import { ConnectionIcon, StarIcon, WaveIcon } from '@/components/Icons';
 import { supabase } from '@/lib/supabase/client';
 import styles from '@/components/WishMap/WishMap.module.css';
 
 type ViewMode = 'star' | 'river';
+
+// Translate domain name based on language
+function getDomainLabel(domain: string | null, language: string): string {
+  if (!domain) return '';
+  if (language === 'en') {
+    const domainEntry = DOMAINS.find(d => d.label === domain);
+    return domainEntry?.labelEn || domain;
+  }
+  return domain;
+}
+
+// Translate stage based on language
+function getStageLabel(stage: string | null, language: string): string {
+  if (!stage) return '';
+  if (language === 'en') {
+    const stageEntry = STAGES.find(s => s.label === stage);
+    return stageEntry?.labelEn || stage;
+  }
+  return stage;
+}
 
 export default function OverviewPage() {
   const { language } = useLanguage();
@@ -102,7 +122,7 @@ export default function OverviewPage() {
       {
         id: 'demo-1',
         title: language === 'zh' ? '全家人去一次邮轮旅行' : 'Family Cruise Trip Together',
-        domain: language === 'zh' ? '家人' : 'Family',
+        domain: '家人',
         stage: '25-35',
         last_level: 'normal',
         last_connected_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
@@ -111,7 +131,7 @@ export default function OverviewPage() {
       {
         id: 'demo-2',
         title: language === 'zh' ? '攒下人生第一个 $1000' : 'Save My First $1000',
-        domain: language === 'zh' ? '钱' : 'Money',
+        domain: '钱',
         stage: '18-25',
         last_level: 'deep',
         last_connected_at: new Date().toISOString(),
@@ -120,7 +140,7 @@ export default function OverviewPage() {
       {
         id: 'demo-3',
         title: language === 'zh' ? '做出自己的产品并上线' : 'Build and Launch My Own Product',
-        domain: language === 'zh' ? '创造' : 'Creation',
+        domain: '创造',
         stage: '25-35',
         last_level: 'deep',
         last_connected_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
@@ -129,7 +149,7 @@ export default function OverviewPage() {
       {
         id: 'demo-4',
         title: language === 'zh' ? '找到人生伴侣' : 'Find My Life Partner',
-        domain: language === 'zh' ? '爱' : 'Love',
+        domain: '爱',
         stage: '25-35',
         last_level: 'normal',
         last_connected_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
@@ -138,7 +158,7 @@ export default function OverviewPage() {
       {
         id: 'demo-5',
         title: language === 'zh' ? '减重 15 斤并保持' : 'Lose 15 lbs and Maintain',
-        domain: language === 'zh' ? '健康' : 'Health',
+        domain: '健康',
         stage: '25-35',
         last_level: 'minimum',
         last_connected_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
@@ -147,7 +167,7 @@ export default function OverviewPage() {
       {
         id: 'demo-6',
         title: language === 'zh' ? '升职成为 Manager' : 'Get Promoted to Manager',
-        domain: language === 'zh' ? '事业' : 'Career',
+        domain: '事业',
         stage: '25-35',
         last_level: 'normal',
         last_connected_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
@@ -198,7 +218,7 @@ export default function OverviewPage() {
                     <b>{wish.title}</b>
                     <div className={styles.wishItemMeta}>
                       <span style={{ fontSize: 11, opacity: 0.7 }}>
-                        {wish.domain} · {wish.stage}
+                        {getDomainLabel(wish.domain, language)} · {getStageLabel(wish.stage, language)}
                       </span>
                       {levelInfo && (
                         <span className={styles.levelBadge} style={{ flexShrink: 0 }}>
@@ -511,18 +531,18 @@ export default function OverviewPage() {
                           <b style={{ display: 'block', fontSize: 13, lineHeight: 1.35, marginBottom: 3 }}>{wish.title}</b>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                             {wish.domain && (
-                              <span style={{ 
-                                fontSize: 10, 
-                                color: 'var(--wish)', 
-                                background: 'rgba(107, 92, 142, 0.1)', 
-                                padding: '1px 6px', 
+                              <span style={{
+                                fontSize: 10,
+                                color: 'var(--wish)',
+                                background: 'rgba(107, 92, 142, 0.1)',
+                                padding: '1px 6px',
                                 borderRadius: 4,
                               }}>
-                                {wish.domain}
+                                {getDomainLabel(wish.domain, language)}
                               </span>
                             )}
                             {wish.stage && (
-                              <span style={{ fontSize: 10, color: 'var(--text)' }}>{wish.stage}</span>
+                              <span style={{ fontSize: 10, color: 'var(--text)' }}>{getStageLabel(wish.stage, language)}</span>
                             )}
                           </div>
                         </div>

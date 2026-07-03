@@ -102,6 +102,18 @@ export default function LoginPage() {
 
           {status && <div className="muted" style={{ marginTop: 6 }}>{status}</div>}
           <div className="muted" style={{ marginTop: 8 }}>{t('auth_hint', lang)}</div>
+
+          <div className="muted" style={{ marginTop: 4, fontSize: 12 }}>
+            {lang === 'en' ? 'By signing up you agree to our ' : '注册即表示你同意'}
+            <a href="/terms" style={{ color: 'var(--wish)', textDecoration: 'underline' }}>
+              {lang === 'en' ? 'Terms' : '服务条款'}
+            </a>
+            {lang === 'en' ? ' and ' : '与'}
+            <a href="/privacy" style={{ color: 'var(--wish)', textDecoration: 'underline' }}>
+              {lang === 'en' ? 'Privacy Policy' : '隐私政策'}
+            </a>
+            {lang === 'en' ? '.' : '。'}
+          </div>
         </div>
       </div>
     </div>

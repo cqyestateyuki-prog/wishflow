@@ -14,7 +14,7 @@ import WishDetail from '@/components/WishCard/WishDetail';
 import { useLocalWishes } from '@/hooks/useLocalWishes';
 import { useLanguage } from '@/components/LanguageProvider';
 import { LocalWish, clearSampleData } from '@/lib/localStore';
-import { DOMAINS, STAGES, WILL_SOURCES, CONNECTION_LEVELS } from '@/lib/mockData';
+import { DOMAINS, STAGES, WILL_SOURCES, CONNECTION_LEVELS } from '@/lib/constants';
 import { supabase } from '@/lib/supabase/client';
 import cardStyles from '@/components/WishCard/WishCard.module.css';
 

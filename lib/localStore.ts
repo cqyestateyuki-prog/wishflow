@@ -5,6 +5,7 @@
  */
 
 import { Wish, Connection, Fragment } from './types';
+import { logger } from '@/lib/logger';
 
 // Storage keys
 const KEYS = {
@@ -53,7 +54,7 @@ function setItem<T>(key: string, value: T): void {
     localStorage.setItem(key, JSON.stringify(value));
     window.dispatchEvent(new Event('wishflow:local-data-changed'));
   } catch (e) {
-    console.warn('Failed to save to localStorage:', e);
+    logger.debug('Failed to save to localStorage:', e);
   }
 }
 

@@ -7,7 +7,7 @@
 'use client';
 
 import { useLanguage } from '@/components/LanguageProvider';
-import { CONNECTION_LEVELS } from '@/lib/mockData';
+import { CONNECTION_LEVELS } from '@/lib/constants';
 import { MoonNew, MoonCrescent, MoonFull } from '../Icons';
 import styles from './WishCard.module.css';
 

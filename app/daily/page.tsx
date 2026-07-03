@@ -15,10 +15,20 @@ import { useLocalWishes } from '@/hooks/useLocalWishes';
 import { useLocalConnections } from '@/hooks/useLocalConnections';
 import { useLanguage } from '@/components/LanguageProvider';
 import { LocalWish } from '@/lib/localStore';
-import { ENERGY_STATES, CONNECTION_LEVELS, MINIMUM_CONNECTIONS } from '@/lib/mockData';
+import { ENERGY_STATES, CONNECTION_LEVELS, DOMAINS } from '@/lib/constants';
 import { ConnectionIcon, EnergyIcon } from '@/components/Icons';
 import { supabase } from '@/lib/supabase/client';
 import { clearSampleData } from '@/lib/localStore';
+
+// Translate domain name based on language
+function getDomainLabel(domain: string | null, language: string): string {
+  if (!domain) return '';
+  if (language === 'en') {
+    const domainEntry = DOMAINS.find(d => d.label === domain);
+    return domainEntry?.labelEn || domain;
+  }
+  return domain;
+}
 
 export default function DailyPage() {
   const { language } = useLanguage();
@@ -198,7 +208,7 @@ export default function DailyPage() {
                 <div style={{ marginBottom: 12 }}>
                   <b style={{ fontSize: 14 }}>{wish.title}</b>
                   <div style={{ fontSize: 11, color: 'var(--text)', opacity: 0.7, marginTop: 4 }}>
-                    {wish.domain}
+                    {getDomainLabel(wish.domain, language)}
                   </div>
                 </div>
               </div>
@@ -426,10 +436,9 @@ export default function DailyPage() {
 
           <div style={{ display: 'grid', gap: 16 }}>
             {recommendedWishes.map((wish) => {
-              const isConnectedToday = connectedToday.has(wish.id) || 
+              const isConnectedToday = connectedToday.has(wish.id) ||
                 todayConnections.some(c => c.wish_id === wish.id);
-              const minConn = MINIMUM_CONNECTIONS[wish.id];
-              
+
               return (
                 <div key={wish.id} style={{ position: 'relative' }}>
                   {isConnectedToday && (

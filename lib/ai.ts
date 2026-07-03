@@ -6,6 +6,7 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { WishDomain, WishMood } from './types';
+import { logger } from '@/lib/logger';
 
 // Classification result type
 export type ClassificationResult = {
@@ -463,27 +464,27 @@ export async function generateWishSceneSpec(description: string): Promise<WishSc
  * @returns SVG string and success status
  */
 export async function generateWishSVGWithAI(description: string): Promise<SVGGenerationResult> {
-  console.log('[SVG Generator] Starting AI SVG generation for:', description.slice(0, 50) + '...');
+  logger.debug('[SVG Generator] Starting AI SVG generation for:', description.slice(0, 50) + '...');
   
   if (!description || description.trim().length < 5) {
-    console.log('[SVG Generator] Error: Description too short');
+    logger.debug('[SVG Generator] Error: Description too short');
     return { svg: '', success: false, error: 'Description too short' };
   }
 
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
-    console.log('[SVG Generator] Error: API key not configured');
+    logger.debug('[SVG Generator] Error: API key not configured');
     return { svg: '', success: false, error: 'API key not configured' };
   }
 
   const client = new Anthropic({ apiKey });
 
   try {
-    console.log('[SVG Generator] Creating scene spec...');
+    logger.debug('[SVG Generator] Creating scene spec...');
     const sceneSpec = await generateWishSceneSpec(description);
-    console.log('[SVG Generator] Scene spec:', sceneSpec);
+    logger.debug('[SVG Generator] Scene spec:', sceneSpec);
 
-    console.log('[SVG Generator] Calling Claude API...');
+    logger.debug('[SVG Generator] Calling Claude API...');
     const startTime = Date.now();
 
     async function requestSvg(prompt: string) {
@@ -496,18 +497,18 @@ export async function generateWishSVGWithAI(description: string): Promise<SVGGen
     }
 
     let raw = await requestSvg(buildSvgPrompt(SVG_GENERATION_PROMPT, description, sceneSpec));
-    console.log('[SVG Generator] Raw response length:', raw.length);
+    logger.debug('[SVG Generator] Raw response length:', raw.length);
 
     let svg = extractSvg(raw);
     if (!svg) {
-      console.log('[SVG Generator] Error: No SVG found in response');
-      console.log('[SVG Generator] Response preview:', raw.slice(0, 200));
+      logger.debug('[SVG Generator] Error: No SVG found in response');
+      logger.debug('[SVG Generator] Response preview:', raw.slice(0, 200));
       return { svg: '', success: false, error: 'No SVG found in response', sceneSpec };
     }
 
     let validation = validateWishSvg(svg);
     if (!validation.ok) {
-      console.log('[SVG Generator] SVG validation failed, retrying:', validation.issues);
+      logger.debug('[SVG Generator] SVG validation failed, retrying:', validation.issues);
       raw = await requestSvg(buildSvgPrompt(SVG_RETRY_PROMPT, description, sceneSpec, validation.issues));
       svg = extractSvg(raw);
       if (!svg) {
@@ -517,7 +518,7 @@ export async function generateWishSVGWithAI(description: string): Promise<SVGGen
     }
 
     if (!validation.ok || !validation.svg) {
-      console.log('[SVG Generator] SVG validation failed after retry:', validation.issues);
+      logger.debug('[SVG Generator] SVG validation failed after retry:', validation.issues);
       return {
         svg: validation.svg ?? '',
         success: false,
@@ -528,12 +529,12 @@ export async function generateWishSVGWithAI(description: string): Promise<SVGGen
     }
 
     const elapsed = Date.now() - startTime;
-    console.log(`[SVG Generator] Claude API responded in ${elapsed}ms`);
-    console.log('[SVG Generator] Success! SVG generated successfully');
+    logger.debug(`[SVG Generator] Claude API responded in ${elapsed}ms`);
+    logger.debug('[SVG Generator] Success! SVG generated successfully');
     return { svg: validation.svg, success: true, sceneSpec };
 
   } catch (error) {
-    console.error('[SVG Generator] API Error:', error);
+    logger.error('[SVG Generator] API Error:', error);
     return {
       svg: '',
       success: false,

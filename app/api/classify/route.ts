@@ -8,15 +8,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { classifyWish, classifyWishLocal, generateWishSVGWithAI, AIError } from '@/lib/ai';
 import { generateWishSVG, renderSVGToString } from '@/lib/svgGenerator';
 import { WishDomain, WishMood } from '@/lib/types';
-
+import { logger } from "@/lib/logger";
 export async function POST(request: NextRequest) {
-  console.log('[API /classify] Request received');
+  logger.debug('[API /classify] Request received');
   
   try {
     const body = await request.json();
     const { description, useLocal = false, generateSVG = false } = body;
 
-    console.log('[API /classify] Params:', { 
+    logger.debug('[API /classify] Params:', { 
       descLength: description?.length, 
       useLocal, 
       generateSVG 
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     // Validate input
     if (!description || typeof description !== 'string') {
-      console.log('[API /classify] Error: Missing description');
+      logger.debug('[API /classify] Error: Missing description');
       return NextResponse.json(
         { error: '请提供愿望描述', code: 'MISSING_DESCRIPTION' },
         { status: 400 }
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (description.trim().length < 5) {
-      console.log('[API /classify] Error: Description too short');
+      logger.debug('[API /classify] Error: Description too short');
       return NextResponse.json(
         { error: '愿望描述太短，请至少输入5个字', code: 'DESCRIPTION_TOO_SHORT' },
         { status: 400 }
@@ -45,17 +45,17 @@ export async function POST(request: NextRequest) {
 
     // Use local classification if requested or if API key is not set
     if (useLocal || !process.env.ANTHROPIC_API_KEY) {
-      console.log('[API /classify] Using local classification');
+      logger.debug('[API /classify] Using local classification');
       classification = classifyWishLocal(description);
       classificationSource = 'local';
     } else {
       // Use Claude API for classification
-      console.log('[API /classify] Using Claude API for classification');
+      logger.debug('[API /classify] Using Claude API for classification');
       classification = await classifyWish(description);
       classificationSource = 'claude';
     }
 
-    console.log('[API /classify] Classification result:', {
+    logger.debug('[API /classify] Classification result:', {
       title: classification.title,
       domain: classification.domain,
       keywords: classification.keywords,
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
     let sceneSpec;
 
     if (generateSVG) {
-      console.log('[API /classify] Starting SVG generation...');
+      logger.debug('[API /classify] Starting SVG generation...');
       
       // Try AI-powered SVG generation first
       if (process.env.ANTHROPIC_API_KEY && !useLocal) {
@@ -77,11 +77,11 @@ export async function POST(request: NextRequest) {
         sceneSpec = svgResult.sceneSpec;
         svgQualityIssues = svgResult.validationIssues;
         if (svgResult.success && svgResult.svg) {
-          console.log('[API /classify] AI SVG generation succeeded');
+          logger.debug('[API /classify] AI SVG generation succeeded');
           svg = svgResult.svg;
         } else {
           // Fallback to domain-based template
-          console.log('[API /classify] AI SVG failed, using fallback:', svgResult.error);
+          logger.debug('[API /classify] AI SVG failed, using fallback:', svgResult.error);
           const templateSVG = generateWishSVG(
             classification.domain as WishDomain,
             classification.mood as WishMood,
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
         }
       } else {
         // No API key, use template directly
-        console.log('[API /classify] No API key, using template SVG');
+        logger.debug('[API /classify] No API key, using template SVG');
         const templateSVG = generateWishSVG(
           classification.domain as WishDomain,
           classification.mood as WishMood,
@@ -102,14 +102,14 @@ export async function POST(request: NextRequest) {
         svgFallback = true;
       }
       
-      console.log('[API /classify] SVG result:', { 
+      logger.debug('[API /classify] SVG result:', { 
         svgLength: svg?.length, 
         svgFallback,
         svgQualityIssues,
       });
     }
 
-    console.log('[API /classify] Returning response');
+    logger.debug('[API /classify] Returning response');
     return NextResponse.json({
       ...classification,
       source: classificationSource,
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Classification error:', error);
+    logger.error('Classification error:', error);
 
     if (error instanceof AIError) {
       // Handle known AI errors

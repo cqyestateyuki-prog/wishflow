@@ -8,6 +8,7 @@ import { useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { syncAllData } from '@/lib/syncData';
 import { clearSampleData } from '@/lib/localStore';
+import { logger } from '@/lib/logger';
 
 export default function AuthCloudSync() {
   const inFlight = useRef(false);
@@ -20,7 +21,7 @@ export default function AuthCloudSync() {
         clearSampleData();
         await syncAllData();
       } catch (e) {
-        console.warn('[AuthCloudSync] sync failed', e);
+        logger.debug('[AuthCloudSync] sync failed', e);
       } finally {
         window.dispatchEvent(new Event('wishflow:local-data-changed'));
         inFlight.current = false;

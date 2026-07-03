@@ -315,6 +315,18 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
+
+      <footer style={{ margin: '48px 0 24px', textAlign: 'center' }}>
+        <div className="muted" style={{ fontSize: 12, display: 'flex', gap: 18, justifyContent: 'center' }}>
+          <a href="/privacy" style={{ textDecoration: 'underline' }}>
+            {lang === 'en' ? 'Privacy Policy' : '隐私政策'}
+          </a>
+          <a href="/terms" style={{ textDecoration: 'underline' }}>
+            {lang === 'en' ? 'Terms of Service' : '服务条款'}
+          </a>
+          <span>© 2026 Wishflow</span>
+        </div>
+      </footer>
     </div>
   );
 }

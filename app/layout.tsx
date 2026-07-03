@@ -1,4 +1,5 @@
 import './globals.css';
+import type { Metadata, Viewport } from 'next';
 import { Fraunces, Work_Sans } from 'next/font/google';
 import Nav from '../components/Nav';
 import AuthCloudSync from '../components/AuthCloudSync';
@@ -16,9 +17,34 @@ const workSans = Work_Sans({
   weight: ['400', '500', '600']
 });
 
-export const metadata = {
-  title: 'Wishflow · 愿航',
-  description: 'Life-long wish navigation system for sensitive minds.'
+export const metadata: Metadata = {
+  title: {
+    default: 'Wishflow · Life-long Wish Navigation',
+    template: '%s · Wishflow',
+  },
+  description:
+    'A gentle, life-long wish navigation system. Leave your wish here — no streaks, no deadlines, no pressure. It will wait for you through every season.',
+  applicationName: 'Wishflow',
+  keywords: ['wishes', 'manifestation', 'mindfulness', 'gentle productivity', 'life goals', '愿望', '愿航'],
+  openGraph: {
+    title: 'Wishflow · Life-long Wish Navigation',
+    description:
+      'Leave your wish here. No streaks, no deadlines, no pressure — it will wait for you through every season.',
+    type: 'website',
+    siteName: 'Wishflow',
+  },
+  appleWebApp: {
+    capable: true,
+    title: 'Wishflow',
+    statusBarStyle: 'default',
+  },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: '#FAF9F7',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -10,7 +10,7 @@ import { useState, useEffect } from 'react';
 import { LocalWish, LocalConnection } from '@/lib/localStore';
 import { useLanguage } from '@/components/LanguageProvider';
 import { useWishConnections } from '@/hooks/useLocalConnections';
-import { CONNECTION_LEVELS, WISH_WHISPERS, MINIMUM_CONNECTIONS } from '@/lib/mockData';
+import { CONNECTION_LEVELS, getWishWhisper, getMinimumConnection, DOMAINS, STAGES } from '@/lib/constants';
 import { ConnectionIcon, PinIcon, PinIconSolid } from '../Icons';
 import ConnectionButtons from './ConnectionButtons';
 import WishVisualization from './WishVisualization';
@@ -42,6 +42,26 @@ function formatDate(dateString: string, language: string): string {
   });
 }
 
+// Translate domain name based on language
+function getDomainLabel(domain: string | null, language: string): string {
+  if (!domain) return '';
+  if (language === 'en') {
+    const domainEntry = DOMAINS.find(d => d.label === domain);
+    return domainEntry?.labelEn || domain;
+  }
+  return domain;
+}
+
+// Translate stage based on language
+function getStageLabel(stage: string | null, language: string): string {
+  if (!stage) return '';
+  if (language === 'en') {
+    const stageEntry = STAGES.find(s => s.label === stage);
+    return stageEntry?.labelEn || stage;
+  }
+  return stage;
+}
+
 export default function WishDetail({ wish, onClose, onConnect, onPinToggle }: WishDetailProps) {
   const { language } = useLanguage();
   const { connections, loading } = useWishConnections(wish.id);
@@ -50,9 +70,8 @@ export default function WishDetail({ wish, onClose, onConnect, onPinToggle }: Wi
   const [connecting, setConnecting] = useState(false);
   const [connectionNotice, setConnectionNotice] = useState('');
 
-  const whisper = WISH_WHISPERS[wish.id] || (language === 'zh' ? '你可以慢慢来。' : 'Take your time.');
-  const minConnection = MINIMUM_CONNECTIONS[wish.id] || 
-    (language === 'zh' ? '看一眼意象图，说一句"我还在"。' : 'Look at the image, say "I\'m still here".');
+  const whisper = getWishWhisper(wish, language as 'en' | 'zh');
+  const minConnection = getMinimumConnection(wish.domain, language as 'en' | 'zh');
 
   // Close on escape key
   useEffect(() => {
@@ -118,12 +137,12 @@ export default function WishDetail({ wish, onClose, onConnect, onPinToggle }: Wi
         <div className={styles.badges}>
           {wish.domain && (
             <span className={`${styles.badge} ${styles.badgeDomain}`}>
-              {wish.domain}
+              {getDomainLabel(wish.domain, language)}
             </span>
           )}
           {wish.stage && (
             <span className={styles.badge}>
-              {language === 'zh' ? '阶段：' : 'Stage: '}{wish.stage}
+              {language === 'zh' ? '阶段：' : 'Stage: '}{getStageLabel(wish.stage, language)}
             </span>
           )}
           {wish.will_source && (

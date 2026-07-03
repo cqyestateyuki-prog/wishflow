@@ -14,7 +14,7 @@ import { useLocalConnections } from '@/hooks/useLocalConnections';
 import { useLocalFragments } from '@/hooks/useLocalFragments';
 import { exportAllData, clearAllLocalData } from '@/lib/localStore';
 import { supabase } from '@/lib/supabase/client';
-import { formatLastSync, getLastSyncTime, hasUnsyncedData, syncAllData, SyncStatus } from '@/lib/syncData';
+import { formatLastSync, getLastSyncError, getLastSyncTime, hasUnsyncedData, syncAllData, SyncStatus } from '@/lib/syncData';
 
 export default function MePage() {
   const { language, setLanguage } = useLanguage();
@@ -25,17 +25,22 @@ export default function MePage() {
   
   const [user, setUser] = useState<any>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
   const [exporting, setExporting] = useState(false);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
   const [syncMessage, setSyncMessage] = useState('');
   const [lastSync, setLastSync] = useState<string | null>(null);
   const [hasPendingSync, setHasPendingSync] = useState(false);
+  const [syncErrorAt, setSyncErrorAt] = useState<string | null>(null);
 
   // Refresh sync banner when local data changes (e.g. after auto-sync on login)
   useEffect(() => {
     const refresh = () => {
       setLastSync(getLastSyncTime());
       setHasPendingSync(hasUnsyncedData());
+      setSyncErrorAt(getLastSyncError()?.at ?? null);
     };
     refresh();
     window.addEventListener('wishflow:local-data-changed', refresh);
@@ -85,6 +90,7 @@ export default function MePage() {
     setSyncStatus(result.status);
     setLastSync(getLastSyncTime());
     setHasPendingSync(hasUnsyncedData());
+    setSyncErrorAt(getLastSyncError()?.at ?? null);
     setSyncMessage(result.status === 'success'
       ? (language === 'zh'
         ? `同步完成：上传 ${result.wishesUploaded} 个愿望、${result.connectionsUploaded} 条连接、${result.fragmentsUploaded} 个碎片。`
@@ -98,6 +104,39 @@ export default function MePage() {
     await supabase.auth.signOut();
     window.location.href = '/';
   }, []);
+
+  // Permanently delete the account and all cloud data (App Store 5.1.1(v))
+  const handleDeleteAccount = useCallback(async () => {
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        setDeleteError(language === 'zh' ? '会话已过期，请重新登录。' : 'Session expired — please sign in again.');
+        setDeleting(false);
+        return;
+      }
+      const res = await fetch('/api/account/delete', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setDeleteError(
+          body.error ||
+            (language === 'zh' ? '删除失败，请稍后重试。' : 'Could not delete the account. Please try again.')
+        );
+        setDeleting(false);
+        return;
+      }
+      await supabase.auth.signOut();
+      clearAllLocalData();
+      window.location.href = '/';
+    } catch {
+      setDeleteError(language === 'zh' ? '网络错误，请稍后重试。' : 'Network error — please try again.');
+      setDeleting(false);
+    }
+  }, [language]);
 
   return (
     <PageShell titleKey="me_title">
@@ -146,6 +185,58 @@ export default function MePage() {
             <button className="btn" onClick={handleSignOut}>
               {language === 'zh' ? '退出登录' : 'Sign Out'}
             </button>
+
+            {/* Delete Account */}
+            <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+              <div style={{ fontWeight: 500, marginBottom: 4, color: '#c53030' }}>
+                {language === 'zh' ? '删除账号' : 'Delete Account'}
+              </div>
+              <div className="muted" style={{ fontSize: 12, marginBottom: 8 }}>
+                {language === 'zh'
+                  ? '永久删除账号以及云端的所有愿望、连接和碎片。此操作不可撤销。'
+                  : 'Permanently delete your account and all wishes, connections, and fragments stored in the cloud. This cannot be undone.'}
+              </div>
+              {!showDeleteConfirm ? (
+                <button
+                  className="btn"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  style={{ borderColor: '#c53030', color: '#c53030' }}
+                >
+                  {language === 'zh' ? '删除账号' : 'Delete Account'}
+                </button>
+              ) : (
+                <div style={{
+                  padding: 16,
+                  background: 'rgba(197, 48, 48, 0.08)',
+                  borderRadius: 14,
+                  border: '1px solid rgba(197, 48, 48, 0.2)',
+                }}>
+                  <p style={{ margin: '0 0 12px', fontSize: 13, color: '#c53030' }}>
+                    {language === 'zh'
+                      ? '确定要永久删除账号吗？云端数据将全部移除，无法恢复。如需备份，请先导出数据。'
+                      : 'Delete your account permanently? All cloud data will be removed and cannot be recovered. Export your data first if you want a backup.'}
+                  </p>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button className="btn" onClick={() => setShowDeleteConfirm(false)} disabled={deleting}>
+                      {language === 'zh' ? '取消' : 'Cancel'}
+                    </button>
+                    <button
+                      className="btn"
+                      onClick={handleDeleteAccount}
+                      disabled={deleting}
+                      style={{ background: '#c53030', color: 'white', borderColor: '#c53030' }}
+                    >
+                      {deleting
+                        ? (language === 'zh' ? '删除中...' : 'Deleting...')
+                        : (language === 'zh' ? '确认删除账号' : 'Confirm Delete')}
+                    </button>
+                  </div>
+                  {deleteError && (
+                    <p style={{ margin: '10px 0 0', fontSize: 12, color: '#c53030' }}>{deleteError}</p>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           <div>
@@ -282,6 +373,22 @@ export default function MePage() {
                 ? '登录后可以把本地愿望、连接和碎片同步到云端。'
                 : 'Sign in to sync local wishes, connections, and fragments to the cloud.')}
           </div>
+          {user && syncErrorAt && syncStatus !== 'syncing' && (
+            <div style={{
+              padding: '10px 12px',
+              marginBottom: 8,
+              borderRadius: 12,
+              background: 'rgba(230, 225, 240, 0.35)',
+              border: '1px solid var(--border)',
+              fontSize: 12,
+              color: 'var(--text)',
+              lineHeight: 1.7,
+            }}>
+              {language === 'zh'
+                ? '上次自动同步没有完成。你的数据仍然安全地保存在这台设备上，可以随时在下方重试。'
+                : "The last automatic sync didn't finish. Your data is safe on this device — you can retry below whenever you like."}
+            </div>
+          )}
           {user ? (
             <button className="btn primary" onClick={handleSync} disabled={syncStatus === 'syncing'}>
               {syncStatus === 'syncing'
@@ -385,10 +492,19 @@ export default function MePage() {
 
         <div style={{ marginTop: 16, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
           <p style={{ color: 'var(--wish)', fontSize: 13, margin: 0, fontStyle: 'italic' }}>
-            {language === 'zh' 
-              ? '愿航不是帮你变得更快，而是让你在任何状态下，都没有离开自己的人生方向。' 
+            {language === 'zh'
+              ? '愿航不是帮你变得更快，而是让你在任何状态下，都没有离开自己的人生方向。'
               : 'Wishflow doesn\'t help you go faster. It helps you stay on your life path, no matter your state.'}
           </p>
+        </div>
+
+        <div style={{ marginTop: 16, display: 'flex', gap: 16 }}>
+          <a href="/privacy" className="muted" style={{ fontSize: 12, textDecoration: 'underline' }}>
+            {language === 'zh' ? '隐私政策' : 'Privacy Policy'}
+          </a>
+          <a href="/terms" className="muted" style={{ fontSize: 12, textDecoration: 'underline' }}>
+            {language === 'zh' ? '服务条款' : 'Terms of Service'}
+          </a>
         </div>
       </section>
     </PageShell>

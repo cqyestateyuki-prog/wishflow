@@ -9,7 +9,7 @@
 import { useState } from 'react';
 import { LocalWish } from '@/lib/localStore';
 import { useLanguage } from '@/components/LanguageProvider';
-import { CONNECTION_LEVELS, WISH_WHISPERS, MINIMUM_CONNECTIONS } from '@/lib/mockData';
+import { CONNECTION_LEVELS, getWishWhisper, getMinimumConnection, DOMAINS, STAGES } from '@/lib/constants';
 import { PinIcon, PinIconSolid, getDomainIcon, ConnectionIcon } from '../Icons';
 import ConnectionButtons from './ConnectionButtons';
 import WishVisualization from './WishVisualization';
@@ -30,12 +30,12 @@ type WishCardProps = {
 // Format relative time
 function formatRelativeTime(dateString: string | null, language: string): string {
   if (!dateString) return language === 'zh' ? '未连接' : 'Not connected';
-  
+
   const date = new Date(dateString);
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  
+
   if (diffDays === 0) return language === 'zh' ? '今天' : 'Today';
   if (diffDays === 1) return language === 'zh' ? '昨天' : 'Yesterday';
   if (diffDays < 7) return language === 'zh' ? `${diffDays} 天前` : `${diffDays} days ago`;
@@ -45,6 +45,26 @@ function formatRelativeTime(dateString: string | null, language: string): string
   }
   const months = Math.floor(diffDays / 30);
   return language === 'zh' ? `${months} 个月前` : `${months} month${months > 1 ? 's' : ''} ago`;
+}
+
+// Translate domain name based on language
+function getDomainLabel(domain: string | null, language: string): string {
+  if (!domain) return '';
+  if (language === 'en') {
+    const domainEntry = DOMAINS.find(d => d.label === domain);
+    return domainEntry?.labelEn || domain;
+  }
+  return domain;
+}
+
+// Translate stage based on language
+function getStageLabel(stage: string | null, language: string): string {
+  if (!stage) return '';
+  if (language === 'en') {
+    const stageEntry = STAGES.find(s => s.label === stage);
+    return stageEntry?.labelEn || stage;
+  }
+  return stage;
 }
 
 export default function WishCard({
@@ -66,9 +86,8 @@ export default function WishCard({
 
   const levelInfo = CONNECTION_LEVELS.find(l => l.id === wish.last_level);
   const DomainIcon = getDomainIcon(wish.domain);
-  const whisper = WISH_WHISPERS[wish.id] || (language === 'zh' ? '你可以慢慢来。' : 'Take your time.');
-  const minConnection = MINIMUM_CONNECTIONS[wish.id] || 
-    (language === 'zh' ? '看一眼意象图，说一句"我还在"。' : 'Look at the image, say "I\'m still here".');
+  const whisper = getWishWhisper(wish, language as 'en' | 'zh');
+  const minConnection = getMinimumConnection(wish.domain, language as 'en' | 'zh');
 
   const handleConnect = async () => {
     if (!selectedLevel || !onConnect) return;
@@ -125,12 +144,12 @@ export default function WishCard({
         {wish.domain && (
           <span className={`${styles.badge} ${styles.badgeDomain}`}>
             <DomainIcon size={12} />
-            {wish.domain}
+            {getDomainLabel(wish.domain, language)}
           </span>
         )}
         {wish.stage && (
           <span className={styles.badge}>
-            {wish.stage}
+            {getStageLabel(wish.stage, language)}
           </span>
         )}
         {levelInfo && (

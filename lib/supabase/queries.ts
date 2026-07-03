@@ -119,3 +119,40 @@ export async function addFragment(payload: { content: string; source?: string })
   if (error) throw error;
   return data as Fragment;
 }
+
+// ---- User settings (cloud copy of local settings) ----
+
+export type UserSettingsRow = {
+  user_id: string;
+  motion: string;
+  contrast: string;
+  haze: string;
+};
+
+export async function fetchUserSettings(): Promise<UserSettingsRow | null> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data, error } = await supabase
+    .from('user_settings')
+    .select('*')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  if (error) throw error;
+  return (data as UserSettingsRow) ?? null;
+}
+
+export async function upsertUserSettings(partial: {
+  motion?: string;
+  contrast?: string;
+  haze?: string;
+}): Promise<UserSettingsRow | null> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data, error } = await supabase
+    .from('user_settings')
+    .upsert({ user_id: user.id, ...partial }, { onConflict: 'user_id' })
+    .select('*')
+    .single();
+  if (error) throw error;
+  return data as UserSettingsRow;
+}
