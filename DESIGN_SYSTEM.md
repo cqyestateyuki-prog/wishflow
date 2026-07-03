@@ -1,377 +1,178 @@
-# Wishflow 愿航 · 设计系统
+# Wishflow 愿航 · 设计系统 v2.0（强约束版）
 
-> 为高敏感灵魂与P型探索者设计的一生级愿望导航系统
-
----
-
-## 品牌定位
-
-**核心理念**：愿望不是项目，是一段关系。
-
-**目标用户**：
-- 高敏感者（HSP）
-- P型人格（抗拒强规划/KPI/打卡）
-- 有长期愿望但难以持续推进的人
-
-**设计原则**：
-1. **低刺激** - 柔和色彩，避免高对比度和闪烁
-2. **无压力** - 不打卡、不展示失败、不催促
-3. **温柔陪伴** - 系统承担结构，用户只负责存在与感受
-4. **持续可见** - 愿望被长期保管，跨年份可视化
+> 为高敏感灵魂与 P 型探索者设计的一生级愿望导航系统。
+> 本文件是**唯一设计事实源**：任何 UI/视觉/动效/文案改动，先对照本文件；与本文件冲突的实现视为 bug。
+> 合并来源：v1.0 设计系统 + 《figma和色彩设计》色彩哲学 + 《愿力图的prompt和设置》视觉母题。
 
 ---
 
-## 色彩系统 (Color Palette)
+## 0. 品牌内核（所有决策的判断依据）
 
-### 主色调
+**核心理念**：愿望不是项目，是一段关系。它不需要被完成来证明价值，只需要被一生温柔保管。
 
-| 变量名 | 色值 | 用途 | 名称 |
-|--------|------|------|------|
-| `--paper` | `#FAF9F7` | 背景色 | 纸白 |
-| `--ink` | `#2E2B33` | 主文字、标题 | 墨色 |
-| `--text` | `#4A5568` | 次要文字、说明 | 正文灰 |
-| `--wish` | `#6B5C8E` | 品牌色、强调、按钮 | 愿望紫 |
-| `--mist` | `#E6E1F0` | 装饰、分割线、hover | 雾紫 |
+**目标用户**：高敏感者（HSP）、P 型人格、抗拒 KPI/打卡/自律工具的人。
+Persona 一句话："我不是没有愿望，我只是没办法一直撑着它。"
 
-### 半透明色
+**四大设计原则**（优先级从高到低）：
+1. **低刺激** — 柔和色彩、无高对比闪烁、无突然运动
+2. **无压力** — 不打卡、不展示失败、不催促、不比较
+3. **温柔陪伴** — 系统承担结构，用户只负责存在与感受
+4. **持续可见** — 愿望跨年份长期可视，永不"过期"
 
-| 变量名 | 色值 | 用途 |
-|--------|------|------|
-| `--card` | `rgba(255,255,255,0.72)` | 卡片背景（毛玻璃效果） |
-| `--border` | `rgba(230,225,240,0.95)` | 边框 |
-
-### CSS 变量定义
-
-```css
-:root {
-  --paper: #FAF9F7;
-  --ink: #2E2B33;
-  --text: #4A5568;
-  --wish: #6B5C8E;
-  --mist: #E6E1F0;
-  --card: rgba(255,255,255,0.72);
-  --border: rgba(230,225,240,0.95);
-}
-```
+> 判断任何新设计时问一句：**"状态最差的那天，用户敢不敢打开它？"** 答案必须是敢。
 
 ---
 
-## 字体系统 (Typography)
+## 1. 视觉母题（Visual Motif）
 
-### 字体族
+整个产品只有一个母题：**一根在时间里行走的、颤动的单线**。
 
-- **衬线字体** (标题): `Fraunces` - 优雅、温暖
-- **无衬线字体** (正文): `Work Sans` - 清晰、现代
-
-### 字体大小
-
-| 级别 | 大小 | 用途 |
-|------|------|------|
-| H1 | `clamp(40px, 4.5vw, 64px)` | 页面主标题 |
-| H2 | `28px` | 区块标题 |
-| H3 | `26px` | 卡片标题 |
-| Body | `16px` | 正文 |
-| Small | `14px` | 次要文字 |
-| Micro | `12-13px` | 标签、提示 |
-
-### 字重
-
-- `400` - 正常
-- `500` - 中等
-- `600` - 半粗
-- `720-750` - 标题加粗
-
-### 行高
-
-- 标题: `1.2-1.4`
-- 正文: `1.6-1.9`
+- 关键词（对外沟通统一用语）：**wobbly / flowing / trembling / unfinished / alive**
+- 形态特征：单根连续线条、歪歪扭扭、有机、不完美、像未完成的笔记本涂鸦
+- 载体：墨色线条（`--ink`，禁纯黑）落在暖纸白（`--paper`）上，**大量留白**
+- 核心意象排序：小船与水面（人生航行）> 蜿蜒小路 > 路径尽头的小屋
+- 一切图形（星图轨道、河流、愿望图、图标）都必须继承"手绘颤动感"——**禁止出现精确的几何圆/直线作为主视觉**（UI 结构件如按钮圆角除外）
 
 ---
 
-## 组件库
+## 2. 色彩系统（定版 Token）
 
-### 1. 按钮 (Buttons)
+### 2.1 核心调色板（不可增改主色）
 
-#### 主要按钮 (Primary)
-```css
-.btn-primary {
-  background: var(--wish);  /* #6B5C8E */
-  color: #fff;
-  border: 0;
-  border-radius: 16px;
-  padding: 14px 18px;
-  font-size: 16px;
-  box-shadow: 0 10px 30px rgba(107,92,142,0.18);
-  transition: transform 120ms ease, box-shadow 180ms ease;
-}
+| Token | 色值 | 角色 | 规则 |
+|---|---|---|---|
+| `--paper` | `#FAF9F7` | 暖纸白背景 | 全站唯一底色，绝对不能抢戏 |
+| `--ink` | `#2E2B33` | 墨色（偏紫深灰） | 标题、线条母题；**全站禁用纯黑 #000** |
+| `--text` | `#4A5568` | 蓝灰正文 | 说明性、结构性、非愿望内容 |
+| `--wish` | `#6B5C8E` | 愿望紫（品牌主色） | **只用于"承载愿望"的地方**（见 2.3） |
+| `--mist` | `#E6E1F0` | 雾紫 | 装饰、分割、hover 底、环境雾 |
 
-.btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 14px 40px rgba(107,92,142,0.22);
-}
-```
+### 2.2 派生 Token（v2.0 新增/定版，与 `app/globals.css` 一一对应）
 
-#### 次要按钮 (Secondary)
-```css
-.btn-secondary {
-  background: transparent;
-  color: var(--wish);
-  border: 2px solid var(--border);
-  border-radius: 16px;
-  padding: 14px 18px;
-}
+| Token | 值 | 用途 |
+|---|---|---|
+| `--card` | `rgba(255,255,255,0.85)` | 卡片底（毛玻璃可配 `backdrop-filter: blur(8-10px)`） |
+| `--border` | `rgba(220,215,235,0.8)` | 边框 |
+| `--shadow` | `0 18px 50px rgba(107,92,142,0.10)` | 卡片默认柔紫投影（禁灰黑投影） |
+| `--shadow-lift` | `0 10px 30px rgba(107,92,142,0.18)` | 主按钮/hover 抬升投影 |
+| `--wish-low` | `#C4B8E0` | 连接等级·浅（🌑 最低连接） |
+| `--wish-mid` | `#9B8FC4` | 连接等级·中（🌒 正常连接） |
+| `--wish-deep` | `#7C6AAF` | 连接等级·深（🌕 深度连接） |
+| `--glow` | `rgba(155,143,196,0.45)` | 辉光基准色（星体 halo、选中态） |
+| `--radius` | `18px` | 基准圆角（卡 22px / 愿力卡 28px / 药丸 999px） |
 
-.btn-secondary:hover {
-  background: rgba(230,225,240,0.35);
-  transform: translateY(-1px);
-}
-```
+### 2.3 紫色使用铁律
 
-### 2. 卡片 (Cards)
+紫色不是用来铺满页面的，是用来"承载愿望"的。紫色才会"贵"，才不焦虑。
 
-#### 标准卡片
-```css
-.card {
-  background: var(--card);  /* rgba(255,255,255,0.72) */
-  border: 1px solid var(--border);
-  border-radius: 22px;
-  padding: 18px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  transition: transform 160ms ease, background 180ms ease;
-}
+**✅ 允许出现**：愿望标题/正文高亮、愿望图及其周边标记、愿望节点与连接线、主 CTA、whisper 文案。
+**❌ 永久禁止**：整页紫背景、高饱和紫渐变、紫色用于错误/警告/失败状态、紫色按钮满屏飞、"显化成功学"式的神秘紫金搭配。
 
-.card:hover {
-  transform: translateY(-2px);
-  background: rgba(255,255,255,0.82);
-}
-```
-
-#### 愿力卡 (Wish Card)
-```css
-.wishcard {
-  display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: 22px;
-  padding: 22px;
-  border-radius: 28px;
-  background: rgba(255,255,255,0.68);
-  border: 1px solid var(--border);
-  backdrop-filter: blur(10px);
-}
-```
-
-### 3. 标签 (Tags)
-
-```css
-.tag {
-  font-size: 12px;
-  color: var(--wish);
-  border: 1px solid var(--border);
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(230,225,240,0.20);
-}
-```
-
-### 4. 徽章 (Badge)
-
-```css
-.badge {
-  display: inline-block;
-  font-size: 12px;
-  color: var(--wish);
-  border: 1px solid var(--border);
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: rgba(230,225,240,0.20);
-}
-```
-
-### 5. 分割线 (Divider)
-
-```css
-.divider {
-  margin: 56px auto;
-  height: 2px;
-  width: min(820px, 86%);
-  background: linear-gradient(90deg, transparent, var(--mist), transparent);
-}
-```
-
-### 6. 连接等级 (Connection Levels)
-
-```css
-.level {
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 12px 14px;
-  background: rgba(250,249,247,0.75);
-  display: grid;
-  gap: 4px;
-}
-```
-
-**等级图标**：
-- 🌑 最低连接 (2分钟)
-- 🌒 正常连接 (15分钟)
-- 🌕 深度连接 (60分钟)
+潜台词：**愿望是被珍惜的，不是被检查的。**
 
 ---
 
-## 动画效果
+## 3. 字体系统
 
-### 1. 流线动画 (Wavy Line)
+| 用途 | 字体 | Token |
+|---|---|---|
+| 标题/情感文案 | Fraunces（衬线，温暖） | `--font-serif` |
+| 正文/UI | Work Sans（无衬线，清晰） | `--font-sans` |
 
-```css
-.alive path {
-  stroke: var(--ink);
-  stroke-width: 3;
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 8 10;
-  animation: drift 10s linear infinite;
-  opacity: 0.95;
-}
-
-@keyframes drift {
-  from { stroke-dashoffset: 0; }
-  to { stroke-dashoffset: -180; }
-}
-```
-
-### 2. 环境雾气 (Ambient Mist)
-
-```css
-.ambient {
-  position: fixed;
-  inset: -20%;
-  pointer-events: none;
-  background:
-    radial-gradient(40% 30% at 20% 20%, rgba(230,225,240,0.55), transparent 60%),
-    radial-gradient(35% 30% at 80% 25%, rgba(230,225,240,0.35), transparent 62%),
-    radial-gradient(45% 40% at 50% 85%, rgba(230,225,240,0.28), transparent 65%);
-  filter: blur(12px);
-  opacity: 0.9;
-}
-```
-
-### 3. 交互反馈
-
-```css
-/* Hover 上移 */
-.interactive:hover {
-  transform: translateY(-2px);
-}
-
-/* 过渡时间 */
---transition-fast: 120ms ease;
---transition-normal: 160-180ms ease;
-```
+字阶（与代码现状对齐）：Hero `clamp(40px,4.5vw,64px)` w750 · 页面 H1 `clamp(32px,4.2vw,56px)` w600 · Section 标题 28px w720 · 卡片 H2 20-26px w600-720 · 正文 16px · 次要 14px · 标签 12-13px。
+行高：标题 1.2-1.4，正文 1.6-1.9。字间距 0.2-0.4px。
 
 ---
 
-## 布局系统
+## 4. 动效规范（低刺激的硬边界）
 
-### 容器宽度
+### 4.1 允许的动效词汇表（只有这五种）
 
-```css
-.wrap {
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 0 24px;
-}
-```
+| 动效 | 参数 | 用途 |
+|---|---|---|
+| **drift 蚂蚁线** | `stroke-dasharray: 8 10`（地图 12-14 8-10），`stroke-dashoffset` 0→-180，**10-18s linear infinite** | 母题线条"在时间里走" |
+| **呼吸 breathe** | scale/opacity 微幅（≤6% scale、≤0.25 opacity 差），**4-8s ease-in-out 往复** | 愿力源核、选中态 |
+| **微浮 float** | translateY ≤4px，**5-9s ease-in-out 往复** | 河中岛屿、卡片装饰 |
+| **闪烁 twinkle** | 仅星尘粒子，opacity 0.2↔0.7，**周期≥3s**，同屏同时闪烁的粒子 ≤1/3 | 星图背景 |
+| **交互过渡** | hover `translateY(-1~-4px)`；transition **120-180ms ease**；active `scale(0.98)` | 按钮/卡片 |
 
-### 网格系统
+### 4.2 硬性禁止
 
-```css
-/* 三列网格 */
-.grid3 {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
-}
+- ❌ 任何 **<3s 周期**的循环动画（呼吸感是慢的）
+- ❌ 闪光、频闪、快速色相变化、彩虹渐变动画
+- ❌ 大位移入场（>24px）、弹跳（bounce/spring 过冲）、旋转装饰（loading 双环除外，且转速 ≥6s/圈）
+- ❌ 自动播放的注意力打断（toast 抖动、红点脉冲）
 
-/* 四列网格（画廊） */
-.gallery {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-}
+### 4.3 双重降级（必须实现，不可选）
 
-/* 响应式 */
-@media (max-width: 980px) {
-  .grid3 { grid-template-columns: 1fr; }
-  .gallery { grid-template-columns: repeat(2, 1fr); }
-}
-```
+1. 系统级：`@media (prefers-reduced-motion: reduce)` → 所有动画停在静止帧
+2. 应用级：`settings.animationEnabled === false`（/me 低刺激开关）→ 同上
+3. 降级后**不允许空白**：drift 线保持可见静止虚线，星尘保持恒定低透明度
 
 ---
 
-## 图标系统
+## 5. 辉光 / 阴影 / 粒子 / 深度（Pinterest 级质感的许可范围）
 
-### 连接等级图标
-- 🌑 最低连接 - 新月（2分钟）
-- 🌒 正常连接 - 上弦月（15分钟）
-- 🌕 深度连接 - 满月（60分钟）
+> v2.0 新增。目的：把星图/河流做出高级 2D 质感，同时不破坏低刺激。
 
-### 愿力源图标
-- 💜 陪伴
-- 🎯 成就
-- 🌱 成长
-- 🎨 创造
-- ❤️ 爱
+- **投影**：只允许紫系投影（`--shadow` / `--shadow-lift`），禁纯灰黑；模糊半径 ≥18px（软），y 位移 ≤18px
+- **辉光**：只加在"承载愿望"的元素上（愿望节点、连接线、源核）。SVG 用 `feGaussianBlur`（stdDeviation 2-6）+ 低透明度同色 halo 圆；连接越深辉光越亮（low→deep：halo opacity 0.15→0.4）
+- **渐变**：只允许**同族低饱和渐变**（wish 系 / mist 系 / paper 系），radial 优先；两端色相差 ≤30°；禁高饱和、禁多色渐变
+- **粒子/星尘**：密度 ≤1 粒/8000px²；单粒 ≤2.5px；透明度 0.15-0.7；只做 twinkle 不做位移
+- **纹理**：可用 ≤3% 透明度的噪点/纸纹增强"纸感"，禁可见图案
+- **深度**：用"透明度+模糊+尺寸"三件套做前后景（远=淡+糊+小），禁 3D 透视变换
 
 ---
 
-## 文案语调
+## 6. 组件规格（与代码对齐）
 
-### 核心原则
-1. **温柔** - 不用"必须"、"应该"
-2. **陪伴** - "我们"而不是"你要"
-3. **允许** - 强调"可以"、"允许"
-4. **无压力** - 避免倒计时、streak、排名
-
-### 示例文案
-- ✅ "你只要留下愿望，剩下的交给系统。"
-- ✅ "看一眼这张图，就算没有断线。"
-- ✅ "允许慢慢来。"
-- ❌ "坚持打卡第X天"
-- ❌ "还差X天完成目标"
+- **主按钮**：`--wish` 底、白字、radius 16、padding 14/18、`--shadow-lift`；hover 加深至 `#5D4F7A` 或 translateY(-1px)
+- **次按钮**：透明底、`--wish` 字、2px `--border` 边、hover `rgba(230,225,240,0.35)` 底
+- **卡片**：`--card` 底 + `--border` + radius 22 + `blur(8px)` + `--shadow`；hover translateY(-2px)
+- **愿力卡**：grid 260px/1fr、radius 28、`rgba(255,255,255,0.68)` + `blur(10px)`
+- **标签/徽章**：12px、`--wish` 字、药丸 999、`rgba(230,225,240,0.2)` 底
+- **分割线**：2px 高，`transparent → --mist → transparent` 横向渐变
+- **连接等级**：🌑 2min（`--wish-low`）/ 🌒 15min（`--wish-mid`）/ 🌕 60min（`--wish-deep`）
+- **图标**：线性 stroke 风格（Feather 系），继承 currentColor；愿力源用 emoji 💜🎯🌱🎨❤️
 
 ---
 
-## 响应式断点
+## 7. 文案语气（英文为主 · English-first）
 
-```css
-/* 桌面 */
-@media (min-width: 981px) { ... }
+产品默认语言为**英文**，中文为完整翻译。两种语言遵循同一套语气规则：
 
-/* 平板 */
-@media (max-width: 980px) { ... }
+| 规则 | English | 中文 |
+|---|---|---|
+| 温柔，禁命令 | 禁 "must / should / don't forget"；用 "you can / whenever you're ready" | 禁"必须/应该"；用"可以/允许" |
+| 陪伴，非监督 | "we'll keep it safe" 而非 "you need to" | "我们"而非"你要" |
+| 允许慢 | "slow is fine" / "it still counts" | "允许慢慢来""就算没有断线" |
+| 禁焦虑机制 | 禁 streak / countdown / "X days left" / ranking / 完成率 | 禁打卡天数/倒计时/排名 |
 
-/* 手机 */
-@media (max-width: 640px) { ... }
-```
-
----
-
-## 文件结构
-
-```
-wishflow/
-├── app/
-│   ├── globals.css          # 全局样式 + CSS 变量
-│   └── page.tsx             # 首页
-├── components/
-│   ├── WishMap/             # 星图/河流组件
-│   └── WishCard/            # 愿力卡组件
-└── lib/
-    └── i18n.ts              # 多语言文案
-```
+示例：✅ "Leave your wish here. We'll hold the rest." ✅ "Looking at it once today still counts."
+❌ "Day 14 streak!" ❌ "You're falling behind."
 
 ---
 
-*Wishflow 愿航 · Design System v1.0*
+## 8. 布局与断点
+
+容器 max 1080-1120px、padding 24px。网格：`.grid.two/.three`（980px 折行）、gallery 4 列（980px→2 列，600px→1 列）。断点：**980px / 640px** 两档。
+环境雾 `.ambient`：固定三点 radial 雾紫渐变 + blur(12px)，全站唯一背景装饰。
+
+---
+
+## 9. 硬性禁令总清单（Review Checklist）
+
+任何 PR/改动过一遍：
+
+1. ❌ 打卡、连胜、倒计时、排名、完成率、失败态可视化
+2. ❌ 纯黑 #000、灰黑投影、整页紫、高饱和渐变、紫色报错
+3. ❌ <3s 循环动画、闪光频闪、弹跳过冲、大位移入场
+4. ❌ 精确几何圆/直线作为主视觉（必须 wobbly）
+5. ❌ 命令式/催促式文案（两种语言都查）
+6. ✅ `prefers-reduced-motion` + `animationEnabled` 双降级都生效
+7. ✅ 文字对比度 ≥ WCAG AA（`--text`/`--ink` on `--paper` 已达标；紫字 ≥14px）
+8. ✅ 紫色只出现在"承载愿望"处
+
+---
+
+*Wishflow 愿航 · Design System v2.0 — 2026-07*

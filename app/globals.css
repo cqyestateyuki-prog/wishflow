@@ -6,7 +6,12 @@
   --mist: #e6e1f0;
   --card: rgba(255, 255, 255, 0.85);
   --border: rgba(220, 215, 235, 0.8);
-  --shadow: none;
+  --shadow: 0 18px 50px rgba(107, 92, 142, 0.1);
+  --shadow-lift: 0 10px 30px rgba(107, 92, 142, 0.18);
+  --wish-low: #c4b8e0;
+  --wish-mid: #9b8fc4;
+  --wish-deep: #7c6aaf;
+  --glow: rgba(155, 143, 196, 0.45);
   --radius: 18px;
 }
 
@@ -62,6 +67,17 @@ main {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
+}
+
+/* 低刺激双降级之一：系统级 reduced-motion（DESIGN_SYSTEM.md §4.3） */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 .muted {
