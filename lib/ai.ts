@@ -92,7 +92,7 @@ export async function classifyWish(description: string): Promise<ClassificationR
 
   try {
     const response = await client.messages.create({
-      model: 'claude-3-5-haiku-20241022',
+      model: 'claude-haiku-4-5',
       max_tokens: 500,
       messages: [
         {
@@ -440,7 +440,7 @@ export async function generateWishSceneSpec(description: string): Promise<WishSc
   const prompt = SCENE_SPEC_PROMPT.replace('{description}', description);
 
   const response = await client.messages.create({
-    model: 'claude-3-5-haiku-20241022',
+    model: 'claude-haiku-4-5',
     max_tokens: 900,
     messages: [{ role: 'user', content: prompt }],
   });
@@ -489,7 +489,7 @@ export async function generateWishSVGWithAI(description: string): Promise<SVGGen
 
     async function requestSvg(prompt: string) {
       const response = await client.messages.create({
-        model: 'claude-3-5-haiku-20241022',
+        model: 'claude-haiku-4-5',
         max_tokens: 4000,
         messages: [{ role: 'user', content: prompt }],
       });
