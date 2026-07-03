@@ -1,7 +1,8 @@
 /**
  * RiverMap Component / 河流地图组件
- * Displays wishes along life stage columns in a flowing river
- * 将愿望显示为人生阶段列中的节点，整个区域是流动的河流
+ * Displays wishes as glowing islands resting in a flowing river of time —
+ * life stages run left to right, wishes gather around the current.
+ * 将愿望显示为栖息在时间之河中的柔光岛屿
  */
 
 'use client';
@@ -11,6 +12,7 @@ import { LocalWish } from '@/lib/localStore';
 import { useLanguage } from '@/components/LanguageProvider';
 import { useSettings } from '@/hooks/useSettings';
 import MapTooltip from './MapTooltip';
+import { makeRiverline, makeDust, truncateTitle } from './artUtils';
 import styles from './WishMap.module.css';
 
 type RiverMapProps = {
@@ -19,6 +21,8 @@ type RiverMapProps = {
   onWishSelect?: (wish: LocalWish) => void;
   onWishClick?: (wish: LocalWish) => void;
 };
+
+const WIDTH = 960;
 
 // Stage X positions (center of each column)
 const STAGE_POSITIONS: Record<string, number> = {
@@ -32,11 +36,13 @@ const STAGE_POSITIONS: Record<string, number> = {
   '现在-未来十年': 480,
 };
 
+const STAGE_COLUMNS = ['13-18', '18-25', '25-35', '35-50', '50+'];
+
 // Normalize stage to one of the 5 main columns for X positioning
 function normalizeStage(stage: string | null): string {
   if (!stage) return '25-35';
   if (stage === '一生' || stage === 'lifetime' || stage === '现在-未来十年') {
-    return '25-35'; // Map to middle column
+    return '25-35';
   }
   if (stage.includes('18') && stage.includes('25')) return '18-25';
   if (stage.includes('13') && stage.includes('18')) return '13-18';
@@ -46,10 +52,9 @@ function normalizeStage(stage: string | null): string {
   return '25-35';
 }
 
-// Fixed vertical spacing between nodes (guaranteed no overlap)
-const MIN_VERTICAL_SPACING = 70; // 70px between node centers for comfortable spacing
+// Vertical spacing between stacked islands in one column
+const STACK_SPACING = 58;
 
-// Get level class for node styling  
 function getLevelClass(level: string | null): string {
   switch (level) {
     case 'minimum': return styles.nodeLow;
@@ -59,6 +64,25 @@ function getLevelClass(level: string | null): string {
   }
 }
 
+function getHaloFill(level: string | null): string {
+  switch (level) {
+    case 'normal': return 'url(#rm-halo-mid)';
+    case 'deep': return 'url(#rm-halo-deep)';
+    default: return 'url(#rm-halo-low)';
+  }
+}
+
+function getBodyFill(level: string | null): string {
+  switch (level) {
+    case 'normal': return 'url(#rm-body-mid)';
+    case 'deep': return 'url(#rm-body-deep)';
+    default: return 'url(#rm-body-low)';
+  }
+}
+
+// Small deterministic horizontal jitter so stacks feel organic, not gridded
+const X_JITTER = [0, 22, -18, 28, -24, 14, -26, 20];
+
 export default function RiverMap({ wishes, selectedWishId, onWishSelect, onWishClick }: RiverMapProps) {
   const { language } = useLanguage();
   const { settings } = useSettings();
@@ -66,7 +90,6 @@ export default function RiverMap({ wishes, selectedWishId, onWishSelect, onWishC
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [showTooltip, setShowTooltip] = useState(false);
 
-  // Group wishes by NORMALIZED stage (maps to 5 columns) for positioning
   const wishesByColumn = useMemo(() => {
     const grouped: Record<string, LocalWish[]> = {};
     wishes.forEach(wish => {
@@ -77,38 +100,44 @@ export default function RiverMap({ wishes, selectedWishId, onWishSelect, onWishC
     return grouped;
   }, [wishes]);
 
-  // Find the max number of wishes in any single column
   const maxWishesInColumn = useMemo(() => {
     return Math.max(1, ...Object.values(wishesByColumn).map(arr => arr.length));
   }, [wishesByColumn]);
 
-  // Dynamic canvas height based on content - generous spacing
-  const canvasHeight = Math.max(520, 100 + maxWishesInColumn * MIN_VERTICAL_SPACING + 80);
+  // Islands alternate above/below the current, so height grows half as fast
+  const maxStackReach = Math.ceil((maxWishesInColumn - 1) / 2) * STACK_SPACING;
+  const canvasHeight = Math.max(520, maxStackReach * 2 + 300);
 
-  // Calculate wish positions along stage columns with staggered horizontal offset
+  // The river itself — centerline, thick body, banks
+  const river = useMemo(() => makeRiverline(canvasHeight, 23), [canvasHeight]);
+
+  // Light on the water
+  const dust = useMemo(
+    () => makeDust(WIDTH, canvasHeight, 26, 11, { yAt: river.yAt, spread: 60 }),
+    [canvasHeight, river]
+  );
+
+  // Islands gather around the river current at their life stage
   const wishPositions = useMemo(() => {
     return wishes.map(wish => {
       const column = normalizeStage(wish.stage);
       const columnWishes = wishesByColumn[column] || [];
       const indexInColumn = columnWishes.findIndex(w => w.id === wish.id);
       const baseX = STAGE_POSITIONS[column] || 480;
-      
-      // Calculate Y position - start at 90, add spacing for each wish
-      const y = 90 + indexInColumn * MIN_VERTICAL_SPACING;
-      
-      // Add staggered horizontal offset for organic feel (wave pattern)
-      // Alternate left/right with varying amounts based on index
-      const offsetPattern = [0, 40, -30, 55, -45, 25, -50, 35]; // Wave offsets (larger)
-      const horizontalOffset = offsetPattern[indexInColumn % offsetPattern.length];
-      
+
+      // 0, -1, +1, -2, +2… around the centerline
+      const step = Math.ceil(indexInColumn / 2);
+      const sign = indexInColumn % 2 === 1 ? -1 : 1;
+      const offsetY = indexInColumn === 0 ? 0 : sign * step * STACK_SPACING;
+
+      const cx = baseX + X_JITTER[indexInColumn % X_JITTER.length];
       return {
         wish,
-        position: { cx: baseX + horizontalOffset, cy: y },
+        position: { cx, cy: river.yAt(cx) + offsetY },
       };
     });
-  }, [wishes, wishesByColumn]);
+  }, [wishes, wishesByColumn, river]);
 
-  // Handle mouse move for tooltip
   const handleMouseMove = useCallback((e: React.MouseEvent, wish: LocalWish) => {
     const rect = e.currentTarget.closest('svg')?.parentElement?.getBoundingClientRect();
     if (rect) {
@@ -144,70 +173,159 @@ export default function RiverMap({ wishes, selectedWishId, onWishSelect, onWishC
       </div>
 
       <div style={{ position: 'relative' }}>
-        <svg 
-          viewBox={`0 0 960 ${canvasHeight}`}
+        <svg
+          viewBox={`0 0 ${WIDTH} ${canvasHeight}`}
           className={styles.svgCanvas}
           style={{ height: canvasHeight }}
-          role="img" 
+          role="img"
           aria-label={language === 'zh' ? '愿力地图（河流）' : 'Wish Map (River)'}
         >
-          {/* Full river gradient background */}
           <defs>
-            <linearGradient id="riverFlowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="rgba(180, 170, 210, 0.08)" />
-              <stop offset="50%" stopColor="rgba(230, 225, 240, 0.12)" />
-              <stop offset="100%" stopColor="rgba(180, 170, 210, 0.08)" />
+            {/* Misty valley air */}
+            <linearGradient id="rm-air" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="rgba(230, 225, 240, 0.16)" />
+              <stop offset="50%" stopColor="rgba(230, 225, 240, 0.05)" />
+              <stop offset="100%" stopColor="rgba(196, 184, 224, 0.12)" />
             </linearGradient>
+
+            {/* River body gradient along the flow */}
+            <linearGradient id="rm-water" x1="0%" y1="0%" x2="100%" y2="0%" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="rgba(155, 143, 196, 0.18)" />
+              <stop offset="50%" stopColor="rgba(124, 106, 175, 0.24)" />
+              <stop offset="100%" stopColor="rgba(155, 143, 196, 0.16)" />
+            </linearGradient>
+
+            {/* Island halos */}
+            <radialGradient id="rm-halo-low" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="rgba(196, 184, 224, 0.38)" />
+              <stop offset="100%" stopColor="rgba(196, 184, 224, 0)" />
+            </radialGradient>
+            <radialGradient id="rm-halo-mid" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="rgba(155, 143, 196, 0.5)" />
+              <stop offset="100%" stopColor="rgba(155, 143, 196, 0)" />
+            </radialGradient>
+            <radialGradient id="rm-halo-deep" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="rgba(124, 106, 175, 0.6)" />
+              <stop offset="100%" stopColor="rgba(124, 106, 175, 0)" />
+            </radialGradient>
+
+            {/* Stage markers fade into the mist at both ends */}
+            <linearGradient id="rm-mistfade" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="rgba(107, 92, 142, 0)" />
+              <stop offset="30%" stopColor="rgba(107, 92, 142, 0.18)" />
+              <stop offset="70%" stopColor="rgba(107, 92, 142, 0.18)" />
+              <stop offset="100%" stopColor="rgba(107, 92, 142, 0)" />
+            </linearGradient>
+
+            {/* Island pearls */}
+            <radialGradient id="rm-body-low" cx="35%" cy="30%" r="80%">
+              <stop offset="0%" stopColor="#E9E2F5" />
+              <stop offset="100%" stopColor="#C4B8E0" />
+            </radialGradient>
+            <radialGradient id="rm-body-mid" cx="35%" cy="30%" r="80%">
+              <stop offset="0%" stopColor="#CFC5E8" />
+              <stop offset="100%" stopColor="#9B8FC4" />
+            </radialGradient>
+            <radialGradient id="rm-body-deep" cx="35%" cy="30%" r="80%">
+              <stop offset="0%" stopColor="#B3A4D6" />
+              <stop offset="100%" stopColor="#7C6AAF" />
+            </radialGradient>
           </defs>
-          <rect x="0" y="0" width="960" height={canvasHeight} fill="url(#riverFlowGradient)" />
 
-          {/* Subtle flowing lines */}
-          <path 
-            className={styles.riverEdge}
-            d={`M0 ${canvasHeight * 0.4} Q240 ${canvasHeight * 0.35}, 480 ${canvasHeight * 0.42} T960 ${canvasHeight * 0.38}`}
-          />
-          <path 
-            className={`${styles.riverEdge} ${styles.riverEdgeFaded}`}
-            d={`M0 ${canvasHeight * 0.7} Q240 ${canvasHeight * 0.75}, 480 ${canvasHeight * 0.68} T960 ${canvasHeight * 0.72}`}
-          />
+          <rect x="0" y="0" width={WIDTH} height={canvasHeight} fill="url(#rm-air)" />
 
-          {/* Stage labels at top */}
-          <text x="96" y="35" className={styles.stageText} textAnchor="middle">13–18</text>
-          <text x="288" y="35" className={styles.stageText} textAnchor="middle">18–25</text>
-          <text x="480" y="35" className={styles.stageText} textAnchor="middle">25–35</text>
-          <text x="672" y="35" className={styles.stageText} textAnchor="middle">35–50</text>
-          <text x="864" y="35" className={styles.stageText} textAnchor="middle">50+</text>
-
-          {/* Stage separator lines */}
-          <line x1="192" y1="45" x2="192" y2={canvasHeight - 10} className={styles.stageLine} />
-          <line x1="384" y1="45" x2="384" y2={canvasHeight - 10} className={styles.stageLine} />
-          <line x1="576" y1="45" x2="576" y2={canvasHeight - 10} className={styles.stageLine} />
-          <line x1="768" y1="45" x2="768" y2={canvasHeight - 10} className={styles.stageLine} />
-
-          {/* Wish nodes */}
-          {wishPositions.map(({ wish, position }) => (
-            <g key={wish.id}>
-              <circle
-                cx={position.cx}
-                cy={position.cy}
-                r={14}
-                className={`${styles.island} ${getLevelClass(wish.last_level)} ${selectedWishId === wish.id ? styles.nodeActive : ''}`}
-                onClick={() => handleNodeClick(wish)}
-                onMouseMove={(e) => handleMouseMove(e, wish)}
-                onMouseLeave={handleMouseLeave}
+          {/* Soft stage markers standing in the mist */}
+          {STAGE_COLUMNS.slice(1).map((stage, i) => {
+            const x = 192 * (i + 1);
+            return (
+              <line
+                key={`sep-${stage}`}
+                x1={x} y1={52} x2={x} y2={canvasHeight - 16}
+                className={styles.stageMark}
               />
-              <text 
-                x={position.cx + 18} 
-                y={position.cy + 6} 
-                className={styles.nodeLabel}
-              >
-                {wish.title.length > 10 ? wish.title.slice(0, 10) + '…' : wish.title}
-              </text>
-            </g>
+            );
+          })}
+          {STAGE_COLUMNS.map((stage) => (
+            <text
+              key={`stage-${stage}`}
+              x={STAGE_POSITIONS[stage]}
+              y={34}
+              className={styles.stageText}
+              textAnchor="middle"
+            >
+              {stage === '50+' ? '50+' : stage.replace('-', '–')}
+            </text>
           ))}
+
+          {/* The river: haze → body → banks → currents */}
+          <path d={river.path} className={styles.riverHaze} />
+          <path d={river.path} className={styles.riverBody} />
+          <path d={river.offsetPath(-26)} className={styles.riverEdge} />
+          <path d={river.offsetPath(26)} className={`${styles.riverEdge} ${styles.riverEdgeFaded}`} />
+          <path d={river.offsetPath(-9)} className={`${styles.flowLine} ${styles.flowSlow}`} />
+          <path d={river.offsetPath(7)} className={`${styles.flowLine} ${styles.flowFast}`} />
+
+          {/* Light on the water */}
+          <g aria-hidden="true">
+            {dust.map((d, i) => (
+              <circle
+                key={i}
+                cx={d.x}
+                cy={d.y}
+                r={d.r}
+                className={d.twinkle ? styles.dustTwinkle : styles.dust}
+                style={
+                  d.twinkle
+                    ? ({
+                        '--dust-base': d.opacity,
+                        animationDuration: `${d.duration}s`,
+                        animationDelay: `${d.delay}s`,
+                      } as React.CSSProperties)
+                    : { opacity: d.opacity }
+                }
+              />
+            ))}
+          </g>
+
+          {/* Wish islands */}
+          {wishPositions.map(({ wish, position }, i) => {
+            const isActive = selectedWishId === wish.id;
+            return (
+              <g
+                key={wish.id}
+                className={styles.islandGroup}
+                style={{ animationDuration: `${6 + (i % 4)}s`, animationDelay: `${(i % 5) * 0.7}s` }}
+              >
+                <circle
+                  cx={position.cx}
+                  cy={position.cy}
+                  r={26}
+                  fill={getHaloFill(wish.last_level)}
+                  className={`${styles.nodeHalo} ${isActive ? styles.nodeHaloActive : ''}`}
+                />
+                <circle
+                  cx={position.cx}
+                  cy={position.cy}
+                  r={13}
+                  fill={getBodyFill(wish.last_level)}
+                  className={`${styles.island} ${getLevelClass(wish.last_level)} ${isActive ? styles.nodeActive : ''}`}
+                  onClick={() => handleNodeClick(wish)}
+                  onMouseMove={(e) => handleMouseMove(e, wish)}
+                  onMouseLeave={handleMouseLeave}
+                />
+                <text
+                  x={position.cx + 19}
+                  y={position.cy + 5}
+                  className={styles.nodeLabel}
+                >
+                  {truncateTitle(wish.title, 10, 18)}
+                </text>
+              </g>
+            );
+          })}
         </svg>
 
-        <MapTooltip 
+        <MapTooltip
           wish={tooltipWish}
           position={tooltipPosition}
           visible={showTooltip}

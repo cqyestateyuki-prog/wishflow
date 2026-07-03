@@ -1,6 +1,7 @@
 /**
  * WishMap Styles
- * Shared styles for StarMap and RiverMap components
+ * Shared styles for StarMap and RiverMap components.
+ * Visual vocabulary follows DESIGN_SYSTEM.md v2.0 §4 (motion) and §5 (glow/dust).
  */
 
 /* Container */
@@ -57,19 +58,20 @@
   width: 12px;
   height: 12px;
   border-radius: 999px;
-  background: #9b8fc4;
+  background: var(--wish-mid, #9b8fc4);
+  box-shadow: 0 0 6px var(--glow, rgba(155, 143, 196, 0.45));
 }
 
 .legendDotLow {
-  background: #c4b8e0;
+  background: var(--wish-low, #c4b8e0);
 }
 
 .legendDotMid {
-  background: #9b8fc4;
+  background: var(--wish-mid, #9b8fc4);
 }
 
 .legendDotDeep {
-  background: #7c6aaf;
+  background: var(--wish-deep, #7c6aaf);
 }
 
 /* SVG Canvas */
@@ -80,38 +82,62 @@
   border-radius: 14px;
 }
 
-.mapBg {
-  fill: rgba(255, 255, 255, 0.45);
-  stroke: rgba(230, 225, 240, 0.95);
-  stroke-width: 1.2;
+/* ===== Starfield dust / light on water (DESIGN_SYSTEM §5) ===== */
+.dust {
+  fill: #9b8fc4;
+  pointer-events: none;
 }
 
-/* Star Map - Rings */
+.dustTwinkle {
+  fill: #9b8fc4;
+  pointer-events: none;
+  opacity: var(--dust-base, 0.4);
+  animation-name: twinkle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: calc(var(--dust-base, 0.4) * 0.4); }
+  50% { opacity: calc(var(--dust-base, 0.4) + 0.25); }
+}
+
+/* ===== Star Map — hand-drawn orbits ===== */
 .ring {
   fill: none;
-  stroke: rgba(107, 92, 142, 0.45);
-  stroke-width: 2.5;
+  stroke: rgba(107, 92, 142, 0.42);
+  stroke-width: 2.2;
   stroke-linecap: round;
   stroke-linejoin: round;
-  stroke-dasharray: 12 8;
-  filter: drop-shadow(0 2px 4px rgba(107, 92, 142, 0.15));
+  stroke-dasharray: 12 9;
   animation: drift 16s linear infinite;
 }
 
 .ringSoft {
-  stroke: rgba(107, 92, 142, 0.35);
-  stroke-width: 2.2;
-  animation-duration: 18s;
+  stroke: rgba(107, 92, 142, 0.3);
+  stroke-width: 2;
 }
 
 .ringFaded {
-  opacity: 0.75;
-  stroke: rgba(107, 92, 142, 0.28);
+  stroke: rgba(107, 92, 142, 0.2);
+  stroke-width: 1.8;
 }
 
 @keyframes drift {
   from { stroke-dashoffset: 0; }
   to { stroke-dashoffset: -260; }
+}
+
+.ringLabel {
+  fill: rgba(107, 92, 142, 0.55);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  paint-order: stroke;
+  stroke: rgba(250, 249, 247, 0.9);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  pointer-events: none;
 }
 
 /* Axis text */
@@ -121,12 +147,22 @@
   font-weight: 600;
 }
 
-/* Core (center) */
+/* ===== Core — a quietly breathing source ===== */
 .core {
-  fill: rgba(248, 246, 252, 0.85);
-  stroke: rgba(180, 160, 210, 0.4);
+  stroke: rgba(180, 160, 210, 0.45);
   stroke-width: 1.5;
-  filter: drop-shadow(0 3px 10px rgba(150, 130, 190, 0.15));
+}
+
+.coreHalo {
+  pointer-events: none;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: breathe 7s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.05); opacity: 1; }
 }
 
 .coreText {
@@ -135,49 +171,90 @@
   font-weight: 700;
 }
 
-/* Wish nodes */
-.node {
-  fill: #9b8fc4;
-  stroke: none;
+/* ===== Wish star-bodies / islands (fill comes from SVG gradients) ===== */
+.node,
+.island {
+  stroke: rgba(255, 255, 255, 0.95);
+  stroke-width: 2;
   cursor: pointer;
-  transition: transform 120ms ease, filter 140ms ease;
+  transition: transform 140ms ease;
   transform-box: fill-box;
   transform-origin: center;
-  filter: drop-shadow(0 2px 8px rgba(130, 100, 180, 0.35));
 }
 
-.node:hover {
+.node:hover,
+.island:hover {
   transform: scale(1.12);
-  filter: drop-shadow(0 4px 12px rgba(130, 100, 180, 0.5));
 }
 
-.nodeLow {
-  fill: #c4b8e0;
-}
-
-.nodeMid {
-  fill: #9b8fc4;
-}
-
-.nodeDeep {
-  fill: #7c6aaf;
-}
+/* Level markers — fill is painted by gradient attributes, not CSS */
+.nodeLow { --level: low; }
+.nodeMid { --level: mid; }
+.nodeDeep { --level: deep; }
 
 .nodeActive {
-  filter: drop-shadow(0 6px 16px rgba(130, 100, 180, 0.5));
+  stroke: rgba(255, 255, 255, 1);
+  stroke-width: 2.5;
+}
+
+.nodeHalo {
+  pointer-events: none;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: opacity 180ms ease, transform 180ms ease;
+  opacity: 0.85;
+}
+
+.starNode:hover .nodeHalo,
+.islandGroup:hover .nodeHalo {
+  opacity: 1;
+  transform: scale(1.12);
+}
+
+.nodeHaloActive {
+  opacity: 1;
+  animation: breathe 6s ease-in-out infinite;
+}
+
+/* Islands drift gently on the water (≤4px, DESIGN_SYSTEM §4.1) */
+.islandGroup {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation-name: floatY;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+@keyframes floatY {
+  from { transform: translateY(0); }
+  to { transform: translateY(-4px); }
 }
 
 .nodeLabel {
-  fill: rgba(46, 43, 51, 0.95);
-  font-size: 16px;
+  fill: rgba(46, 43, 51, 0.85);
+  font-size: 15px;
   font-weight: 600;
+  pointer-events: none;
+  paint-order: stroke;
+  stroke: rgba(250, 249, 247, 0.9);
+  stroke-width: 3.5px;
+  stroke-linejoin: round;
+}
+
+/* ===== Connection link (core → selected wish) ===== */
+.linkGlow {
+  fill: none;
+  stroke: rgba(155, 143, 196, 0.5);
+  stroke-width: 7;
+  stroke-linecap: round;
+  opacity: 0.8;
   pointer-events: none;
 }
 
-/* Connection link */
 .link {
   fill: none;
-  stroke: rgba(46, 43, 51, 0.55);
+  stroke: rgba(107, 92, 142, 0.65);
   stroke-width: 2.2;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -191,29 +268,61 @@
   to { stroke-dashoffset: -240; }
 }
 
-/* River Map - River */
-.river {
+/* ===== River Map — a real flowing body of water ===== */
+.riverHaze {
   fill: none;
-  stroke: rgba(107, 92, 142, 0.22);
+  stroke: rgba(155, 143, 196, 0.12);
+  stroke-width: 78;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: blur(14px);
+  pointer-events: none;
+}
+
+.riverBody {
+  fill: none;
+  stroke: url(#rm-water);
   stroke-width: 46;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: drop-shadow(0 14px 32px rgba(107, 92, 142, 0.08));
+  filter: drop-shadow(0 14px 32px rgba(107, 92, 142, 0.1));
+  pointer-events: none;
 }
 
 .riverEdge {
   fill: none;
-  stroke: rgba(107, 92, 142, 0.5);
-  stroke-width: 2.5;
+  stroke: rgba(107, 92, 142, 0.45);
+  stroke-width: 2.2;
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-dasharray: 14 10;
-  filter: drop-shadow(0 2px 4px rgba(107, 92, 142, 0.12));
   animation: driftRiver 18s linear infinite;
+  pointer-events: none;
 }
 
 .riverEdgeFaded {
   opacity: 0.55;
+}
+
+/* Inner currents — thin light streaks moving at different speeds */
+.flowLine {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.55);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-dasharray: 3 16;
+  animation: driftRiver linear infinite;
+  pointer-events: none;
+}
+
+.flowSlow {
+  animation-duration: 26s;
+  opacity: 0.7;
+}
+
+.flowFast {
+  animation-duration: 15s;
+  opacity: 0.9;
 }
 
 @keyframes driftRiver {
@@ -221,44 +330,31 @@
   to { stroke-dashoffset: -320; }
 }
 
-/* Stage lines (River) */
-.stageLine {
-  stroke: rgba(107, 92, 142, 0.3);
-  stroke-width: 2;
-  stroke-dasharray: 6 8;
+/* Stage markers standing in the mist */
+.stageMark {
+  stroke: url(#rm-mistfade);
+  stroke-width: 1.5;
 }
 
 .stageText {
-  fill: rgba(74, 85, 104, 0.95);
-  font-size: 18px;
-  font-weight: 700;
+  fill: rgba(74, 85, 104, 0.7);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 1px;
 }
 
-/* Islands (River wishes) */
-.island {
-  fill: #9b8fc4;
-  stroke: none;
-  cursor: pointer;
-  transition: transform 120ms ease, filter 140ms ease;
-  transform-box: fill-box;
-  transform-origin: center;
-  filter: drop-shadow(0 2px 8px rgba(130, 100, 180, 0.35));
-}
-
-.island:hover {
-  transform: scale(1.12);
-  filter: drop-shadow(0 4px 12px rgba(130, 100, 180, 0.5));
-}
-
-/* Tooltip */
+/* ===== Tooltip — frosted glass ===== */
 .tooltip {
   position: absolute;
   min-width: 240px;
   max-width: 300px;
-  padding: 10px 12px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid var(--border);
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(220, 215, 235, 0.9);
+  box-shadow: var(--shadow-lift, 0 10px 30px rgba(107, 92, 142, 0.18));
   color: var(--ink);
   font-size: 12px;
   line-height: 1.65;
@@ -288,6 +384,7 @@
 .tooltipWhisper {
   color: var(--wish);
   margin-top: 6px;
+  font-style: italic;
 }
 
 /* Sidebar wish list */
@@ -473,25 +570,24 @@
     grid-template-columns: 1fr;
     min-height: auto;
   }
-  
+
   .svgCanvas {
     height: 450px;
     flex: none;
   }
-  
+
   .sidebar {
     height: auto;
     max-height: 400px;
   }
-  
+
   .mapWrap {
     height: auto;
   }
 }
 
-/* Animation disabled state */
-.noAnimation .ring,
-.noAnimation .riverEdge,
-.noAnimation .link {
-  animation: none;
+/* Animation disabled state (app-level low-stimulation switch).
+   Everything stays visible, frozen on a calm frame — never blank. */
+.noAnimation * {
+  animation: none !important;
 }
