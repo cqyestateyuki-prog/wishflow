@@ -185,50 +185,50 @@ export default function RiverMap({ wishes, selectedWishId, onWishSelect, onWishC
             <linearGradient id="rm-air" x1="0%" y1="0%" x2="0%" y2="100%">
               <stop offset="0%" stopColor="rgba(230, 225, 240, 0.16)" />
               <stop offset="50%" stopColor="rgba(230, 225, 240, 0.05)" />
-              <stop offset="100%" stopColor="rgba(196, 184, 224, 0.12)" />
+              <stop offset="100%" stopColor="rgba(205, 194, 230, 0.12)" />
             </linearGradient>
 
             {/* River body gradient along the flow */}
             <linearGradient id="rm-water" x1="0%" y1="0%" x2="100%" y2="0%" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="rgba(155, 143, 196, 0.18)" />
-              <stop offset="50%" stopColor="rgba(124, 106, 175, 0.24)" />
-              <stop offset="100%" stopColor="rgba(155, 143, 196, 0.16)" />
+              <stop offset="0%" stopColor="rgba(150, 133, 190, 0.18)" />
+              <stop offset="50%" stopColor="rgba(124, 106, 170, 0.24)" />
+              <stop offset="100%" stopColor="rgba(150, 133, 190, 0.16)" />
             </linearGradient>
 
             {/* Island halos */}
             <radialGradient id="rm-halo-low" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="rgba(196, 184, 224, 0.38)" />
-              <stop offset="100%" stopColor="rgba(196, 184, 224, 0)" />
+              <stop offset="0%" stopColor="rgba(205, 194, 230, 0.38)" />
+              <stop offset="100%" stopColor="rgba(205, 194, 230, 0)" />
             </radialGradient>
             <radialGradient id="rm-halo-mid" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="rgba(155, 143, 196, 0.5)" />
-              <stop offset="100%" stopColor="rgba(155, 143, 196, 0)" />
+              <stop offset="0%" stopColor="rgba(150, 133, 190, 0.5)" />
+              <stop offset="100%" stopColor="rgba(150, 133, 190, 0)" />
             </radialGradient>
             <radialGradient id="rm-halo-deep" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="rgba(124, 106, 175, 0.6)" />
-              <stop offset="100%" stopColor="rgba(124, 106, 175, 0)" />
+              <stop offset="0%" stopColor="rgba(124, 106, 170, 0.6)" />
+              <stop offset="100%" stopColor="rgba(124, 106, 170, 0)" />
             </radialGradient>
 
             {/* Stage markers fade into the mist at both ends */}
             <linearGradient id="rm-mistfade" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="rgba(107, 92, 142, 0)" />
-              <stop offset="30%" stopColor="rgba(107, 92, 142, 0.18)" />
-              <stop offset="70%" stopColor="rgba(107, 92, 142, 0.18)" />
-              <stop offset="100%" stopColor="rgba(107, 92, 142, 0)" />
+              <stop offset="0%" stopColor="rgba(145, 127, 185, 0)" />
+              <stop offset="30%" stopColor="rgba(145, 127, 185, 0.18)" />
+              <stop offset="70%" stopColor="rgba(145, 127, 185, 0.18)" />
+              <stop offset="100%" stopColor="rgba(145, 127, 185, 0)" />
             </linearGradient>
 
             {/* Island pearls */}
             <radialGradient id="rm-body-low" cx="35%" cy="30%" r="80%">
-              <stop offset="0%" stopColor="#E9E2F5" />
-              <stop offset="100%" stopColor="#C4B8E0" />
+              <stop offset="0%" stopColor="#ece6f6" />
+              <stop offset="100%" stopColor="#cdc2e4" />
             </radialGradient>
             <radialGradient id="rm-body-mid" cx="35%" cy="30%" r="80%">
-              <stop offset="0%" stopColor="#CFC5E8" />
-              <stop offset="100%" stopColor="#9B8FC4" />
+              <stop offset="0%" stopColor="#d3c9ec" />
+              <stop offset="100%" stopColor="#a794d0" />
             </radialGradient>
             <radialGradient id="rm-body-deep" cx="35%" cy="30%" r="80%">
               <stop offset="0%" stopColor="#B3A4D6" />
-              <stop offset="100%" stopColor="#7C6AAF" />
+              <stop offset="100%" stopColor="#7c6aaa" />
             </radialGradient>
           </defs>
 

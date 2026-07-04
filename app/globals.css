@@ -2,16 +2,20 @@
   --paper: #faf9f7;
   --ink: #2e2b33;
   --text: #4a5568;
-  --wish: #6b5c8e;
-  --mist: #e6e1f0;
+  /* Wisteria × Dusty-Lilac — a soft, luminous heather purple.
+     --wish carries fills, buttons, and large accents; --wish-ink is the deep
+     partner for small text / links / captions so they stay readable on paper. */
+  --wish: #917fb9;
+  --wish-ink: #5e4e8c;
+  --mist: #eee9f5;
   --card: rgba(255, 255, 255, 0.85);
-  --border: rgba(220, 215, 235, 0.8);
-  --shadow: 0 18px 50px rgba(107, 92, 142, 0.1);
-  --shadow-lift: 0 10px 30px rgba(107, 92, 142, 0.18);
-  --wish-low: #c4b8e0;
-  --wish-mid: #9b8fc4;
-  --wish-deep: #7c6aaf;
-  --glow: rgba(155, 143, 196, 0.45);
+  --border: rgba(214, 206, 233, 0.8);
+  --shadow: 0 18px 50px rgba(145, 127, 185, 0.12);
+  --shadow-lift: 0 10px 30px rgba(145, 127, 185, 0.2);
+  --wish-low: #cdc2e4;
+  --wish-mid: #a794d0;
+  --wish-deep: #7c6aaa;
+  --glow: rgba(145, 127, 185, 0.5);
   --radius: 18px;
 }
 
@@ -120,15 +124,15 @@ main {
 }
 
 .btn.primary {
-  background: rgba(155, 143, 196, 0.15);
-  border-color: rgba(107, 92, 142, 0.7);
-  color: var(--wish);
+  background: rgba(145, 127, 185, 0.15);
+  border-color: rgba(145, 127, 185, 0.7);
+  color: var(--wish-ink);
   font-weight: 600;
 }
 
 .btn.primary:hover {
-  background: rgba(155, 143, 196, 0.2);
-  border-color: rgba(107, 92, 142, 0.85);
+  background: rgba(145, 127, 185, 0.2);
+  border-color: rgba(145, 127, 185, 0.85);
 }
 
 .btn.dark {
@@ -149,8 +153,8 @@ main {
 }
 
 .btn.solid:hover {
-  background: #5d4f7a;
-  border-color: #5d4f7a;
+  background: #7a68a0;
+  border-color: #7a68a0;
 }
 
 /* Soft "example / demo" notice — warm wish tint, never a disabled-looking gray */
@@ -159,9 +163,9 @@ main {
   border-radius: 16px;
   margin-bottom: 20px;
   text-align: center;
-  background: rgba(155, 143, 196, 0.09);
-  border: 1px solid rgba(155, 143, 196, 0.22);
-  color: var(--wish);
+  background: rgba(145, 127, 185, 0.09);
+  border: 1px solid rgba(145, 127, 185, 0.22);
+  color: var(--wish-ink);
   font-size: 14px;
 }
 
@@ -173,7 +177,7 @@ main {
   border: 1px solid var(--border);
   border-radius: 999px;
   font-size: 12px;
-  color: var(--wish);
+  color: var(--wish-ink);
   background: rgba(230, 225, 240, 0.2);
 }
 
@@ -279,12 +283,12 @@ main {
 }
 
 .btn-primary-large:hover {
-  background: #5d4f7a;
+  background: #7a68a0;
 }
 
 .btn-secondary-large {
   background: transparent;
-  color: var(--wish);
+  color: var(--wish-ink);
   border: 2px solid var(--border);
   border-radius: 16px;
   padding: 14px 18px;
@@ -347,7 +351,7 @@ main {
 .center-note {
   margin-top: 18px;
   text-align: center;
-  color: var(--wish);
+  color: var(--wish-ink);
   font-size: 16px;
 }
 
@@ -406,7 +410,7 @@ main {
 
 .tag {
   font-size: 12px;
-  color: var(--wish);
+  color: var(--wish-ink);
   border: 1px solid var(--border);
   padding: 6px 10px;
   border-radius: 999px;
@@ -440,7 +444,7 @@ main {
 
 .whisper-text {
   margin-top: 12px;
-  color: var(--wish);
+  color: var(--wish-ink);
   font-size: 13px;
 }
 
@@ -503,7 +507,7 @@ main {
 
 .bottom-note {
   margin-top: 16px;
-  color: var(--wish);
+  color: var(--wish-ink);
   font-size: 15px;
   font-style: italic;
 }

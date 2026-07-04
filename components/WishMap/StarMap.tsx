@@ -215,20 +215,20 @@ export default function StarMap({ wishes, selectedWishId, onWishSelect, onWishCl
           <defs>
             {/* Paper nebula — layered, very quiet */}
             <radialGradient id="sm-nebula" cx="50%" cy="48%" r="62%">
-              <stop offset="0%" stopColor="rgba(107, 92, 142, 0.15)" />
+              <stop offset="0%" stopColor="rgba(145, 127, 185, 0.15)" />
               <stop offset="45%" stopColor="rgba(230, 225, 240, 0.2)" />
               <stop offset="100%" stopColor="rgba(250, 249, 247, 0)" />
             </radialGradient>
             <radialGradient id="sm-nebula-drift" cx="72%" cy="24%" r="46%">
-              <stop offset="0%" stopColor="rgba(196, 184, 224, 0.10)" />
+              <stop offset="0%" stopColor="rgba(205, 194, 230, 0.10)" />
               <stop offset="100%" stopColor="rgba(250, 249, 247, 0)" />
             </radialGradient>
 
             {/* Core */}
             <radialGradient id="sm-core-halo" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="rgba(155, 143, 196, 0.30)" />
-              <stop offset="60%" stopColor="rgba(155, 143, 196, 0.12)" />
-              <stop offset="100%" stopColor="rgba(155, 143, 196, 0)" />
+              <stop offset="0%" stopColor="rgba(150, 133, 190, 0.30)" />
+              <stop offset="60%" stopColor="rgba(150, 133, 190, 0.12)" />
+              <stop offset="100%" stopColor="rgba(150, 133, 190, 0)" />
             </radialGradient>
             <radialGradient id="sm-core-body" cx="40%" cy="34%" r="75%">
               <stop offset="0%" stopColor="#FFFFFF" />
@@ -238,30 +238,30 @@ export default function StarMap({ wishes, selectedWishId, onWishSelect, onWishCl
 
             {/* Star-body halos, brightness grows with connection depth */}
             <radialGradient id="sm-halo-low" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="rgba(196, 184, 224, 0.38)" />
-              <stop offset="100%" stopColor="rgba(196, 184, 224, 0)" />
+              <stop offset="0%" stopColor="rgba(205, 194, 230, 0.38)" />
+              <stop offset="100%" stopColor="rgba(205, 194, 230, 0)" />
             </radialGradient>
             <radialGradient id="sm-halo-mid" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="rgba(155, 143, 196, 0.5)" />
-              <stop offset="100%" stopColor="rgba(155, 143, 196, 0)" />
+              <stop offset="0%" stopColor="rgba(150, 133, 190, 0.5)" />
+              <stop offset="100%" stopColor="rgba(150, 133, 190, 0)" />
             </radialGradient>
             <radialGradient id="sm-halo-deep" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="rgba(124, 106, 175, 0.6)" />
-              <stop offset="100%" stopColor="rgba(124, 106, 175, 0)" />
+              <stop offset="0%" stopColor="rgba(124, 106, 170, 0.6)" />
+              <stop offset="100%" stopColor="rgba(124, 106, 170, 0)" />
             </radialGradient>
 
             {/* Star-body pearls — light falls from upper left */}
             <radialGradient id="sm-body-low" cx="35%" cy="30%" r="80%">
-              <stop offset="0%" stopColor="#E9E2F5" />
-              <stop offset="100%" stopColor="#C4B8E0" />
+              <stop offset="0%" stopColor="#ece6f6" />
+              <stop offset="100%" stopColor="#cdc2e4" />
             </radialGradient>
             <radialGradient id="sm-body-mid" cx="35%" cy="30%" r="80%">
-              <stop offset="0%" stopColor="#CFC5E8" />
-              <stop offset="100%" stopColor="#9B8FC4" />
+              <stop offset="0%" stopColor="#d3c9ec" />
+              <stop offset="100%" stopColor="#a794d0" />
             </radialGradient>
             <radialGradient id="sm-body-deep" cx="35%" cy="30%" r="80%">
               <stop offset="0%" stopColor="#B3A4D6" />
-              <stop offset="100%" stopColor="#7C6AAF" />
+              <stop offset="100%" stopColor="#7c6aaa" />
             </radialGradient>
 
             {/* Soft blur for the glowing link under-stroke */}
