@@ -57,38 +57,48 @@ function createClient(): Anthropic {
   return new Anthropic({ apiKey });
 }
 
-// Classification prompt template
-const CLASSIFICATION_PROMPT = `你是一个愿望分析助手。请分析以下愿望描述，返回 JSON 格式的结果。
+export type UiLanguage = 'en' | 'zh';
 
-愿望描述：
-{description}
+// Classification prompt — domain/mood stay as the internal Chinese enums,
+// but title + keywords follow the user's UI language so an English UI never
+// shows Chinese chrome (and vice versa).
+function buildClassificationPrompt(description: string, language: UiLanguage): string {
+  const isEn = language === 'en';
+  const outLang = isEn ? 'English' : 'Chinese (中文)';
+  const titleSpec = isEn ? '3 to 7 words' : '10-15 个字';
+  return `You are a wish-analysis assistant. Analyze the wish below and return JSON only.
 
-请返回以下格式的 JSON（不要包含其他文字）：
+Wish:
+${description}
+
+Return exactly this JSON, no other text:
 {
-  "domain": "从以下选项中选择最匹配的一个：家人、事业、钱、健康、创造、生活、爱",
-  "keywords": ["提取2-3个核心意象词，用于生成可视化图像"],
-  "mood": "从以下选项中选择情绪基调：温暖、激励、平静、期待、自由",
-  "title": "用10-15个字概括这个愿望的简短标题"
+  "domain": one of these EXACT Chinese values: 家人, 事业, 钱, 健康, 创造, 生活, 爱,
+  "keywords": [2 or 3 short, concrete, visual imagery words in ${outLang}],
+  "mood": one of these EXACT Chinese values: 温暖, 激励, 平静, 期待, 自由,
+  "title": a short ${outLang} title (${titleSpec}) capturing the heart of the wish
 }
 
-注意：
-- domain 必须是：家人、事业、钱、健康、创造、生活、爱 中的一个
-- mood 必须是：温暖、激励、平静、期待、自由 中的一个
-- keywords 应该是具体的、有画面感的词，便于生成可视化
-- title 应该简洁有力，抓住愿望的核心`;
+Rules:
+- "domain" MUST be exactly one of the 7 Chinese values above — this is an internal category, keep it Chinese.
+- "mood" MUST be exactly one of the 5 Chinese values above — internal category, keep it Chinese.
+- "keywords" and "title" MUST be written in ${outLang} (the user's interface language), regardless of what language the wish itself is written in.
+- keywords should be concrete and image-friendly (things you could draw), not abstract.`;
+}
 
 /**
  * Classify a wish description using Claude API
  * @param description - The wish description to classify
+ * @param language - The user's UI language (drives title & keyword language)
  * @returns Classification result with domain, keywords, mood, and title
  */
-export async function classifyWish(description: string): Promise<ClassificationResult> {
+export async function classifyWish(description: string, language: UiLanguage = 'en'): Promise<ClassificationResult> {
   if (!description || description.trim().length < 5) {
     throw new AIError('Description is too short', 'INVALID_INPUT');
   }
 
   const client = createClient();
-  const prompt = CLASSIFICATION_PROMPT.replace('{description}', description);
+  const prompt = buildClassificationPrompt(description, language);
 
   try {
     const response = await client.messages.create({
@@ -158,7 +168,7 @@ export async function classifyWish(description: string): Promise<ClassificationR
  * @param description - The wish description to classify
  * @returns Classification result based on keyword matching
  */
-export function classifyWishLocal(description: string): ClassificationResult {
+export function classifyWishLocal(description: string, language: UiLanguage = 'en'): ClassificationResult {
   const text = description.toLowerCase();
   
   // Domain keywords mapping
@@ -222,131 +232,84 @@ export function classifyWishLocal(description: string): ClassificationResult {
   );
   const title = description.slice(0, titleEnd).trim() + (titleEnd < description.length ? '' : '');
 
+  // Keep chrome (keywords/title) in the user's UI language.
+  const fallbackKeywords = language === 'en' ? ['a wish', 'life'] : ['生活', '愿望'];
+  const localizedKeywords = language === 'en'
+    ? (keywords.length > 0 ? keywords.map(kw => LOCAL_KEYWORD_EN[kw] || kw) : fallbackKeywords)
+    : (keywords.length > 0 ? keywords : fallbackKeywords);
+
   return {
     domain: bestDomain,
-    keywords: keywords.length > 0 ? keywords : ['生活', '愿望'],
+    keywords: localizedKeywords,
     mood: bestMood,
-    title: title || description.slice(0, 15),
+    title: title || description.slice(0, language === 'en' ? 40 : 15),
   };
 }
 
-const WISHFLOW_ART_DIRECTION = `愿航线条图美术语法：
-- 低刺激、暖白底、soft ink / 低饱和紫灰线条。
-- 简笔画、单线条感、轻微手绘抖动，但主体必须清晰可识别。
-- 不出现文字、数字、logo、大面积实心填充、写实阴影、照片风格。
-- 每张图最多 1 个主体 + 2 到 4 个辅助元素。
-- 主体使用 stroke-width 2.2-3，细节使用 1.2-1.8。
-- 所有线条使用 stroke-linecap="round" stroke-linejoin="round"。
-- 动画只用于水、风、云、星光等流动元素，不给主体加大幅动画。`;
+// Minimal EN gloss for the local (offline) keyword matcher's Chinese hits.
+const LOCAL_KEYWORD_EN: Record<string, string> = {
+  家人: 'family', 家庭: 'family', 孩子: 'children', 父母: 'parents',
+  工作: 'work', 事业: 'career', 创业: 'startup', 项目: 'project',
+  钱: 'money', 收入: 'income', 存款: 'savings', 投资: 'investing', 被动收入: 'passive income',
+  健康: 'health', 运动: 'exercise', 睡眠: 'sleep', 减肥: 'fitness',
+  创作: 'creating', 写作: 'writing', 艺术: 'art', 音乐: 'music', 设计: 'design',
+  生活: 'life', 旅行: 'travel', 房子: 'home', 习惯: 'habit',
+  爱: 'love', 爱情: 'love', 伴侣: 'partner', 婚姻: 'marriage', 感情: 'relationship',
+};
 
-const SCENE_SPEC_PROMPT = `你是 Wishflow 愿航的视觉策划。请把用户愿望转成适合简笔画 SVG 的场景规格。
+// Full single-line-illustration art direction, written for a capable model
+// that can actually plan SVG geometry. Encodes the aesthetic AND the specific
+// failure modes we've seen (giant blob figures, disconnected scribbles).
+const SVG_GENERATION_PROMPT = `You are the illustrator for Wishflow — a gentle, life-long wish app. Draw ONE quiet, hand-drawn, single-line-style SVG scene that lovingly represents the user's wish. Think Pinterest / Dribbble minimal line art, drawn with a calm confident pen on warm paper.
 
-${WISHFLOW_ART_DIRECTION}
+# The aesthetic (follow exactly)
+- One clear, RECOGNIZABLE subject in generous empty space. A viewer should name it in one second.
+- Continuous, flowing, gently wobbly strokes — like one unbroken pen line. Curves over rigid corners. A little organic imperfection is good; disconnected scribbles are not.
+- Calm and minimal: ONE main subject + 2 to 4 small supporting elements. No clutter, no background fill.
+- Never include <text>, numbers, logos, realistic shading, gradients, or large solid-filled shapes. fill="none" on everything except tiny dot accents (r ≤ 3).
 
-返回严格 JSON，不要输出其他文字：
-{
-  "subject": "一个具体可画的主体，用英文短语描述",
-  "supportingElements": ["2-4个辅助元素，用英文短语描述"],
-  "composition": "主体位置与前后层次，英文一句话",
-  "motionElements": ["可以轻微动画的流动元素，如 waves/clouds/stars，没有则空数组"],
-  "avoid": ["text", "numbers", "logos", "large filled areas"],
-  "style": "single-line wobbly warm minimal SVG, no text"
-}
+# Proportion rules (critical — avoids ugly output)
+- Draw a PERSON as small and gestural: a small circle head (r 5-8), a simple curved-line body, thin limbs. People are SMALL accents in the scene, never giant ovals. Never draw a huge ellipse "head" or a big filled blob body.
+- Objects should sit at believable size and rest on a ground/water line, not float randomly.
+- Keep the whole drawing inside the safe area x: 40-360, y: 30-190.
 
-愿望描述：
-{description}`;
+# Canvas & lines
+- viewBox MUST be "0 0 400 220". The subject sits centered, slightly low (around x 200, y 90-160).
+- Main subject: stroke="#2E2B33" stroke-width="2.6". Supporting: stroke="#6B5C8E" stroke-width="1.8". Distant/background: stroke="#B5A8D0" stroke-width="1.4".
+- Every stroke: stroke-linecap="round" stroke-linejoin="round" (put these on a wrapping <g> so all children inherit).
 
-// SVG Generation prompt template
-const SVG_GENERATION_PROMPT = `你是 Wishflow 愿航的 SVG 简笔画插画师。根据 scene spec 生成一幅稳定、可识别、低刺激的愿望线条图。
-
-【任务】
-根据结构化 scene spec 绘制 SVG。请画具体主体，不要画抽象符号。
-
-${WISHFLOW_ART_DIRECTION}
-
-【绘图要求 - 非常重要】
-1. 画具体的东西，不要抽象图形：
-   - 邮轮/船：船体、船舱、窗户、烟囱、海浪。
-   - 旅行：飞机/行李箱/地标/路线。
-   - 家人：2-4个简笔人物 + 家/桌子/船等场景。
-   - 房子：屋顶、门、窗、路。
-   - 钱/财富：钱袋、硬币、账本、上升但不要进度条。
-   - 健康：小人、叶子、心跳线、跑步姿态。
-   - 创造：笔、书页、画框、电脑、星光。
-   
-2. 画面构图：
-   - viewBox 必须是 "0 0 400 220"。
-   - 主体放在中心偏下（x=90-310, y=80-170）。
-   - 背景元素放后面，辅助元素放角落或主体附近。
-   - 避免过多元素，保持安静。
-   
-3. 线条风格：
-   - 主体用粗线 stroke-width="2.4"。
-   - 细节用细线 stroke-width="1.4"。
-   - 每个 path/line/polyline/rect/circle 都要设置圆角线条属性或继承自 <g>。
-
-【颜色】
-- 主体线: #2E2B33
-- 辅助线: #6B5C8E
-- 背景线: #B5A8D0
-- fill: none，除非是极小点状装饰。
-
-【动画 - 只给流动元素添加】
+# Motion (only for flowing things)
+Add a small <style> with these keyframes and animate ONLY water, clouds, mist, or starlight — never the boat/house/person:
 <style>
-@keyframes wave { 0% { transform: translateX(0); } 100% { transform: translateX(-20px); } }
-@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes wave { from { transform: translateX(0); } to { transform: translateX(-20px); } }
+@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 </style>
+Waves: stroke-dasharray="14 8" style="animation: wave 6s linear infinite". Clouds/mist: style="animation: float 7s ease-in-out infinite".
 
-- 海浪：stroke-dasharray="15 8" style="animation: wave 3s linear infinite"
-- 云朵：style="animation: float 4s ease-in-out infinite"
-- 固定物体（船、房子、人）：不加动画！
+# What to draw for different wishes
+Pick concrete imagery from the wish (draw the noun, not a symbol):
+- travel / boat: a small sailboat or boat on gentle waves, a sun, maybe a distant shore.
+- family / love: a small house or a boat with 1-2 small gestural figures close together; a heart accent.
+- home / peace: a cozy house with a pitched roof, a door, a curl of smoke, a small tree, a path.
+- money / growth: a growing plant or small tree, a watering can, gentle rising hills — never coins-as-progress-bar.
+- health: a sprout, a leaf, a calm figure stretching, a gentle hill path.
+- creation: an open book, a pen with a flowing line, a picture frame, a few stars.
+- direction / future: a winding path over hills toward a rising sun or a single guiding star.
 
-【示例 - 邮轮旅行】
-<svg viewBox="0 0 400 220" xmlns="http://www.w3.org/2000/svg">
-<style>@keyframes wave { 0% { transform: translateX(0); } 100% { transform: translateX(-20px); } }</style>
-<!-- 海浪背景 -->
-<path d="M0 160 Q50 150 100 160 T200 160 T300 160 T400 160" stroke="#B5A8D0" stroke-width="2" fill="none" stroke-dasharray="15 8" style="animation: wave 3s linear infinite"/>
-<path d="M0 175 Q50 165 100 175 T200 175 T300 175 T400 175" stroke="#B5A8D0" stroke-width="1.5" fill="none" stroke-dasharray="12 6" style="animation: wave 4s linear infinite"/>
-<!-- 邮轮主体 -->
-<path d="M120 140 L280 140 L300 160 L100 160 Z" stroke="#6B5C8E" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-<!-- 船舱 -->
-<rect x="150" y="115" width="100" height="25" rx="3" stroke="#6B5C8E" stroke-width="2" fill="none"/>
-<!-- 烟囱 -->
-<rect x="220" y="95" width="20" height="20" stroke="#6B5C8E" stroke-width="2" fill="none"/>
-<!-- 窗户 -->
-<circle cx="170" cy="127" r="5" stroke="#8E7BB0" stroke-width="1.5" fill="none"/>
-<circle cx="200" cy="127" r="5" stroke="#8E7BB0" stroke-width="1.5" fill="none"/>
-<circle cx="230" cy="127" r="5" stroke="#8E7BB0" stroke-width="1.5" fill="none"/>
-<!-- 人物剪影（在甲板上）-->
-<circle cx="140" cy="130" r="4" fill="#6B5C8E"/>
-<line x1="140" y1="134" x2="140" y2="140" stroke="#6B5C8E" stroke-width="1.5"/>
-<circle cx="155" cy="128" r="4" fill="#6B5C8E"/>
-<line x1="155" y1="132" x2="155" y2="140" stroke="#6B5C8E" stroke-width="1.5"/>
-<!-- 太阳 -->
-<circle cx="350" cy="40" r="15" stroke="#8E7BB0" stroke-width="2" fill="none"/>
-</svg>
+# Output
+Output ONLY the SVG, from <svg ...> to </svg>, nothing before or after. No <text>, <script>, <foreignObject>, external links, or event attributes.
 
-【输出要求】
-1. 只输出 <svg>...</svg>，不要其他文字
-2. viewBox="0 0 400 220"
-3. 画具体的场景，不要只画几何图形
-4. 主体要清晰可辨认
-5. 禁止 <text>、<script>、<foreignObject>、外链、onload/onclick 等事件属性
-
-【用户愿望描述】
+User's wish:
 {description}
 
-【Scene Spec JSON】
-{sceneSpec}
-
-请根据 scene spec 生成具象的 SVG 插画：`;
+Now draw the SVG:`;
 
 const SVG_RETRY_PROMPT = `${SVG_GENERATION_PROMPT}
 
-上一次 SVG 没有通过质量检查，问题如下：
+Your previous attempt failed these quality checks:
 {issues}
 
-请修正这些问题，只输出新的 <svg>...</svg>。`;
+Fix them and output ONLY the corrected <svg>...</svg>.`;
 
 function extractTextContent(response: { content?: Array<{ type: string; text?: string }> }): string {
   const textContent = response.content?.find(block => block.type === 'text');
@@ -369,10 +332,9 @@ function extractSvg(raw: string): string | null {
   return svgMatch ? svgMatch[0] : null;
 }
 
-function buildSvgPrompt(template: string, description: string, sceneSpec: WishSceneSpec, issues?: string[]): string {
+function buildSvgPrompt(template: string, description: string, issues?: string[]): string {
   return template
     .replace('{description}', description)
-    .replace('{sceneSpec}', JSON.stringify(sceneSpec, null, 2))
     .replace('{issues}', issues?.map(issue => `- ${issue}`).join('\n') ?? '');
 }
 
@@ -431,33 +393,6 @@ export function validateWishSvg(svg: string): SVGValidationResult {
   };
 }
 
-export async function generateWishSceneSpec(description: string): Promise<WishSceneSpec> {
-  if (!description || description.trim().length < 5) {
-    throw new AIError('Description is too short', 'INVALID_INPUT');
-  }
-
-  const client = createClient();
-  const prompt = SCENE_SPEC_PROMPT.replace('{description}', description);
-
-  const response = await client.messages.create({
-    model: 'claude-haiku-4-5',
-    max_tokens: 900,
-    messages: [{ role: 'user', content: prompt }],
-  });
-
-  const raw = extractTextContent(response);
-  const result = extractJson<WishSceneSpec>(raw);
-
-  return {
-    subject: result.subject || 'a quiet symbolic object',
-    supportingElements: Array.isArray(result.supportingElements) ? result.supportingElements.slice(0, 4) : [],
-    composition: result.composition || 'Centered subject, calm background, a few small supporting elements.',
-    motionElements: Array.isArray(result.motionElements) ? result.motionElements.slice(0, 3) : [],
-    avoid: Array.isArray(result.avoid) ? result.avoid : ['text', 'numbers', 'logos', 'large filled areas'],
-    style: result.style || 'single-line wobbly warm minimal SVG, no text',
-  };
-}
-
 /**
  * Generate SVG visualization using Claude AI
  * @param description - The wish description to visualize
@@ -480,39 +415,37 @@ export async function generateWishSVGWithAI(description: string): Promise<SVGGen
   const client = new Anthropic({ apiKey });
 
   try {
-    logger.debug('[SVG Generator] Creating scene spec...');
-    const sceneSpec = await generateWishSceneSpec(description);
-    logger.debug('[SVG Generator] Scene spec:', sceneSpec);
-
-    logger.debug('[SVG Generator] Calling Claude API...');
+    logger.debug('[SVG Generator] Calling Claude API (single Sonnet pass)...');
     const startTime = Date.now();
 
+    // Sonnet draws far better geometry than Haiku, and one direct call is
+    // faster than the old scene-spec + draw two-step. Template fallback in the
+    // route covers the rare miss, so a model error here is never fatal.
     async function requestSvg(prompt: string) {
       const response = await client.messages.create({
-        model: 'claude-haiku-4-5',
-        max_tokens: 4000,
+        model: 'claude-sonnet-5',
+        max_tokens: 2600,
         messages: [{ role: 'user', content: prompt }],
       });
       return extractTextContent(response);
     }
 
-    let raw = await requestSvg(buildSvgPrompt(SVG_GENERATION_PROMPT, description, sceneSpec));
+    let raw = await requestSvg(buildSvgPrompt(SVG_GENERATION_PROMPT, description));
     logger.debug('[SVG Generator] Raw response length:', raw.length);
 
     let svg = extractSvg(raw);
     if (!svg) {
       logger.debug('[SVG Generator] Error: No SVG found in response');
-      logger.debug('[SVG Generator] Response preview:', raw.slice(0, 200));
-      return { svg: '', success: false, error: 'No SVG found in response', sceneSpec };
+      return { svg: '', success: false, error: 'No SVG found in response' };
     }
 
     let validation = validateWishSvg(svg);
     if (!validation.ok) {
       logger.debug('[SVG Generator] SVG validation failed, retrying:', validation.issues);
-      raw = await requestSvg(buildSvgPrompt(SVG_RETRY_PROMPT, description, sceneSpec, validation.issues));
+      raw = await requestSvg(buildSvgPrompt(SVG_RETRY_PROMPT, description, validation.issues));
       svg = extractSvg(raw);
       if (!svg) {
-        return { svg: '', success: false, error: 'Retry did not return SVG', sceneSpec, validationIssues: validation.issues };
+        return { svg: '', success: false, error: 'Retry did not return SVG', validationIssues: validation.issues };
       }
       validation = validateWishSvg(svg);
     }
@@ -523,15 +456,13 @@ export async function generateWishSVGWithAI(description: string): Promise<SVGGen
         svg: validation.svg ?? '',
         success: false,
         error: `SVG failed quality checks: ${validation.issues.join('; ')}`,
-        sceneSpec,
         validationIssues: validation.issues,
       };
     }
 
     const elapsed = Date.now() - startTime;
     logger.debug(`[SVG Generator] Claude API responded in ${elapsed}ms`);
-    logger.debug('[SVG Generator] Success! SVG generated successfully');
-    return { svg: validation.svg, success: true, sceneSpec };
+    return { svg: validation.svg, success: true };
 
   } catch (error) {
     logger.error('[SVG Generator] API Error:', error);

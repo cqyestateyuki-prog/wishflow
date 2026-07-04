@@ -61,9 +61,10 @@ export default function TryPage() {
       const response = await fetch(apiUrl('/api/classify'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           description: desc,
-          generateSVG: true  // Request SVG generation
+          generateSVG: true,  // Request SVG generation
+          language,           // so title & keywords match the UI language
         }),
       });
       
@@ -86,13 +87,13 @@ export default function TryPage() {
       // Fallback: return default classification without SVG
       return {
         domain: '生活' as WishDomain,
-        keywords: ['愿望'],
+        keywords: language === 'zh' ? ['愿望'] : ['a wish'],
         mood: '平静' as WishMood,
-        title: desc.slice(0, 20) + (desc.length > 20 ? '...' : ''),
+        title: desc.slice(0, 40) + (desc.length > 40 ? '…' : ''),
         svgFallback: true,
       };
     }
-  }, []);
+  }, [language]);
 
   // Generate visualization with animation
   const handleGenerate = useCallback(async () => {
@@ -299,45 +300,31 @@ export default function TryPage() {
         </div>
       )}
 
-      {/* Step 2: Generating Animation */}
+      {/* Step 2: Generating Animation — a little boat rocking on a self-drawing wave */}
       {step === 'generating' && (
         <div className="card" style={{ padding: 48, textAlign: 'center' }}>
-          {/* Animated SVG placeholder */}
-          <div style={{ 
-            width: 200, 
-            height: 200, 
-            margin: '0 auto 24px',
-            display: 'grid',
-            placeItems: 'center',
-          }}>
-            <svg viewBox="0 0 100 100" style={{ width: 120, height: 120 }}>
-              <circle 
-                cx="50" cy="50" r="40" 
-                fill="none" 
-                stroke="var(--wish)" 
-                strokeWidth="3"
-                strokeDasharray="60 200"
-                style={{ 
-                  animation: 'spin 1.5s linear infinite',
-                  transformOrigin: 'center',
-                }}
-              />
-              <circle 
-                cx="50" cy="50" r="25" 
-                fill="none" 
-                stroke="var(--border)" 
-                strokeWidth="2"
-                strokeDasharray="40 100"
-                style={{ 
-                  animation: 'spin 2s linear infinite reverse',
-                  transformOrigin: 'center',
-                }}
-              />
+          <div style={{ width: 200, height: 150, margin: '0 auto 20px', display: 'grid', placeItems: 'center' }}>
+            <svg viewBox="0 0 160 120" style={{ width: 180, height: 135, overflow: 'visible' }}
+                 fill="none" stroke="var(--ink)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              {/* twinkling star */}
+              <circle cx="124" cy="28" r="9" stroke="var(--wish)" strokeWidth="2.4" className="gen-twinkle" />
+              {/* the little boat, gently rocking */}
+              <g className="gen-boat">
+                <path d="M52 78 Q 80 94 108 78" />
+                <path d="M80 78 L 80 30" />
+                <path d="M80 34 C 104 46 106 66 83 76" />
+                <path d="M80 30 L 94 27 L 80 24" strokeWidth="2" />
+              </g>
+              {/* the wave, drawing itself over and over */}
+              <path d="M14 96 Q 34 88 54 96 T 94 96 T 146 96" stroke="var(--wish)" strokeWidth="2.6"
+                    strokeDasharray="180" className="gen-wave" />
+              <path d="M20 106 Q 40 100 60 106 T 100 106 T 150 106" stroke="var(--wish)" strokeWidth="2"
+                    opacity="0.4" strokeDasharray="180" className="gen-wave2" />
             </svg>
           </div>
-          
+
           <h3 style={{ fontSize: 18, fontWeight: 600, color: 'var(--ink)', marginBottom: 20 }}>
-            {language === 'zh' ? '正在为你的愿望绘制意象图...' : 'Creating your wish visualization...'}
+            {language === 'zh' ? '正在为你的愿望，慢慢画出形状…' : 'Giving your wish a shape…'}
           </h3>
           
           {/* Progress steps */}
@@ -390,9 +377,34 @@ export default function TryPage() {
           </div>
           
           <style jsx>{`
-            @keyframes spin {
-              from { transform: rotate(0deg); }
-              to { transform: rotate(360deg); }
+            .gen-boat {
+              transform-box: fill-box;
+              transform-origin: 80px 88px;
+              animation: gen-rock 3.2s ease-in-out infinite;
+            }
+            @keyframes gen-rock {
+              0%, 100% { transform: rotate(-4deg); }
+              50% { transform: rotate(4deg); }
+            }
+            .gen-wave {
+              animation: gen-draw 2.4s ease-in-out infinite;
+            }
+            .gen-wave2 {
+              animation: gen-draw 2.4s ease-in-out infinite;
+              animation-delay: 0.4s;
+            }
+            @keyframes gen-draw {
+              0% { stroke-dashoffset: 180; }
+              55%, 100% { stroke-dashoffset: 0; }
+            }
+            .gen-twinkle {
+              transform-box: fill-box;
+              transform-origin: center;
+              animation: gen-tw 2.6s ease-in-out infinite;
+            }
+            @keyframes gen-tw {
+              0%, 100% { opacity: 0.35; }
+              50% { opacity: 1; }
             }
           `}</style>
         </div>

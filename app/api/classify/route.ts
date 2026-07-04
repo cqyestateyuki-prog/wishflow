@@ -11,10 +11,15 @@ import { WishDomain, WishMood } from '@/lib/types';
 import { logger } from "@/lib/logger";
 export async function POST(request: NextRequest) {
   logger.debug('[API /classify] Request received');
-  
+
+  // Parsed once here so the error handler can reuse it for graceful fallback
+  // (the request body can only be read a single time).
+  let body: any = {};
+
   try {
-    const body = await request.json();
+    body = await request.json();
     const { description, useLocal = false, generateSVG = false } = body;
+    const language: 'en' | 'zh' = body.language === 'zh' ? 'zh' : 'en';
 
     logger.debug('[API /classify] Params:', { 
       descLength: description?.length, 
@@ -46,12 +51,12 @@ export async function POST(request: NextRequest) {
     // Use local classification if requested or if API key is not set
     if (useLocal || !process.env.ANTHROPIC_API_KEY) {
       logger.debug('[API /classify] Using local classification');
-      classification = classifyWishLocal(description);
+      classification = classifyWishLocal(description, language);
       classificationSource = 'local';
     } else {
       // Use Claude API for classification
       logger.debug('[API /classify] Using Claude API for classification');
-      classification = await classifyWish(description);
+      classification = await classifyWish(description, language);
       classificationSource = 'claude';
     }
 
@@ -119,30 +124,36 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     logger.error('Classification error:', error);
 
-    if (error instanceof AIError) {
-      // Handle known AI errors
-      const statusMap: Record<string, number> = {
-        'MISSING_API_KEY': 503,
-        'INVALID_INPUT': 400,
-        'INVALID_RESPONSE': 502,
-        'PARSE_ERROR': 502,
-        'API_ERROR': 502,
-      };
-      
+    // Only a genuinely invalid input should surface as an error; every
+    // service-side failure (no credit, timeout, parse) degrades gracefully.
+    if (error instanceof AIError && error.code === 'INVALID_INPUT') {
       return NextResponse.json(
         { error: error.message, code: error.code },
-        { status: statusMap[error.code] || 500 }
+        { status: 400 }
       );
     }
 
-    // Fallback to local classification on API errors
+    // Graceful degradation: if the AI API is unavailable (e.g. no credit,
+    // network error), still return a local classification AND a built-in
+    // template drawing so the user never sees a stuck "Generating…" state.
     try {
-      const body = await request.clone().json();
-      const result = classifyWishLocal(body.description);
+      if (!body || typeof body.description !== 'string') throw new Error('no body');
+      const result = classifyWishLocal(body.description, body.language === 'zh' ? 'zh' : 'en');
+      const wantsSvg = body.generateSVG === true;
+      let svg: string | undefined;
+      if (wantsSvg) {
+        const templateSVG = generateWishSVG(
+          result.domain as WishDomain,
+          result.mood as WishMood,
+          body.description
+        );
+        svg = renderSVGToString(templateSVG);
+      }
       return NextResponse.json({
         ...result,
         source: 'local',
         fallback: true,
+        ...(wantsSvg && { svg, svgFallback: true }),
       });
     } catch {
       return NextResponse.json(
