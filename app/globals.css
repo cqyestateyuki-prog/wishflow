@@ -137,6 +137,34 @@ main {
   border-color: rgba(46, 43, 51, 0.9);
 }
 
+/* Solid primary CTA — filled wish purple with guaranteed readable text.
+   Use this (not `btn primary` + a background override) for real call-to-actions;
+   `btn primary` stays the soft-tint style for selected/toggle states. */
+.btn.solid {
+  background: var(--wish);
+  border-color: var(--wish);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: var(--shadow-lift);
+}
+
+.btn.solid:hover {
+  background: #5d4f7a;
+  border-color: #5d4f7a;
+}
+
+/* Soft "example / demo" notice — warm wish tint, never a disabled-looking gray */
+.demo-note {
+  padding: 12px 18px;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  text-align: center;
+  background: rgba(155, 143, 196, 0.09);
+  border: 1px solid rgba(155, 143, 196, 0.22);
+  color: var(--wish);
+  font-size: 14px;
+}
+
 .badge {
   display: inline-flex;
   align-items: center;
@@ -441,7 +469,7 @@ main {
   border: 1px solid var(--border);
   background: var(--paper);
   padding: 10px;
-  height: 120px;
+  height: 140px;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -449,7 +477,9 @@ main {
 }
 
 .gallery-thumb svg {
-  width: 120%;
+  height: 90%;
+  width: auto;
+  max-width: 92%;
   opacity: 0.95;
 }
 

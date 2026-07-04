@@ -401,6 +401,14 @@ export default function TryPage() {
       {/* Step 3: Preview */}
       {step === 'preview' && classification && (
         <div>
+          {/* Quiet back link — a secondary step, not a peer of Save */}
+          <button
+            onClick={() => setStep('input')}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)', fontSize: 13, padding: '4px 0', marginBottom: 8 }}
+          >
+            {language === 'zh' ? '← 返回编辑' : '← Back to edit'}
+          </button>
+
           {/* Visualization */}
           <div 
             style={{ 
@@ -495,19 +503,12 @@ export default function TryPage() {
             </div>
           </div>
 
-          {/* Actions */}
+          {/* Actions — two clear choices: try again, or keep it */}
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button className="btn" onClick={() => setStep('input')}>
-              {language === 'zh' ? '返回编辑' : 'Back to Edit'}
-            </button>
             <button className="btn" onClick={handleGenerate}>
               {language === 'zh' ? '重新生成一张' : 'Regenerate'}
             </button>
-            <button 
-              className="btn primary" 
-              onClick={handleSave}
-              style={{ background: 'var(--wish)', borderColor: 'var(--wish)', color: '#fff' }}
-            >
+            <button className="btn solid" onClick={handleSave}>
               {language === 'zh' ? '保存愿望' : 'Save Wish'}
             </button>
           </div>
@@ -531,32 +532,22 @@ export default function TryPage() {
               : 'Your wish is saved locally and now appears in Wish Gallery. You can view it, connect with it, or create another.'}
           </p>
 
+          {/* One primary next step + one secondary; the rest are quiet links */}
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/daily" className="btn">
-              {language === 'zh' ? '今日连接' : 'Today'}
-            </Link>
-            <Link href="/overview" className="btn">
-              {language === 'zh' ? '愿力地图' : 'Wish Map'}
-            </Link>
-          </div>
-
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap', marginTop: 16 }}>
             <button className="btn" onClick={handleReset}>
               {language === 'zh' ? '再创建一个' : 'Create Another'}
             </button>
-            <Link href="/wishes" className="btn primary" style={{ background: 'var(--wish)', borderColor: 'var(--wish)' }}>
+            <Link href="/wishes" className="btn solid">
               {language === 'zh' ? '查看愿望画廊' : 'View Wish Gallery'}
             </Link>
           </div>
 
-          <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid var(--border)' }}>
-            <p className="muted" style={{ fontSize: 13 }}>
-              {language === 'zh' 
-                ? '想要跨设备同步？' 
-                : 'Want to sync across devices?'}
-            </p>
-            <Link href="/login" className="btn dark" style={{ marginTop: 12 }}>
-              {language === 'zh' ? '登录账号' : 'Sign In'}
+          <div style={{ marginTop: 18, display: 'flex', gap: 22, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link href="/daily" style={{ color: 'var(--wish)', fontSize: 13, textDecoration: 'none' }}>
+              {language === 'zh' ? '今日连接' : 'Today'}
+            </Link>
+            <Link href="/overview" style={{ color: 'var(--wish)', fontSize: 13, textDecoration: 'none' }}>
+              {language === 'zh' ? '愿力地图' : 'Wish Map'}
             </Link>
           </div>
         </div>

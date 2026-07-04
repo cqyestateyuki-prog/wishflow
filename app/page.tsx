@@ -79,22 +79,14 @@ export default function HomePage() {
           {lang === 'en' ? 'Wish Card: Visualize your wishes' : '愿力卡：可视化你的愿望。'}
         </h2>
         
-        <div style={{ 
-          padding: '16px 20px', 
-          background: 'rgba(200, 195, 220, 0.15)', 
-          borderRadius: 16, 
-          marginBottom: 20,
-          textAlign: 'center',
-          border: '1px dashed rgba(180, 170, 210, 0.4)'
-        }}>
-          <p style={{ margin: 0, fontSize: 14, color: 'var(--text)' }}>
-            {lang === 'en' 
-              ? 'This is a demo wish card. Create your own to start your journey!' 
-              : '这是示例愿望卡。创建你自己的愿望，开始你的旅程！'}
-          </p>
+        <div className="demo-note">
+          <span aria-hidden="true" style={{ marginRight: 6 }}>✦</span>
+          {lang === 'en'
+            ? 'A demo wish card — create your own to start your journey'
+            : '示例愿望卡 · 创建你自己的愿望，开始旅程'}
         </div>
 
-        <div className="wishcard-preview" style={{ opacity: 0.75 }}>
+        <div className="wishcard-preview">
           <div className="wishcard-sketch" aria-label={lang === 'en' ? 'Wish visualization' : '愿望意象图'}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" style={{ overflow: 'visible' }}>
               <style>{`
@@ -233,26 +225,27 @@ export default function HomePage() {
           {lang === 'en' ? 'Wish Gallery: Your wishes live here' : '愿望画廊：你的愿望，会住在这里'}
         </h2>
         
-        <div style={{ 
-          padding: '16px 20px', 
-          background: 'rgba(200, 195, 220, 0.15)', 
-          borderRadius: 16, 
-          marginBottom: 20,
-          textAlign: 'center',
-          border: '1px dashed rgba(180, 170, 210, 0.4)'
-        }}>
-          <p style={{ margin: 0, fontSize: 14, color: 'var(--text)' }}>
-            {lang === 'en' 
-              ? 'Example wishes. Sign up to create your own collection!' 
-              : '示例愿望。注册后创建你自己的愿望收藏！'}
-          </p>
+        <div className="demo-note">
+          <span aria-hidden="true" style={{ marginRight: 6 }}>✦</span>
+          {lang === 'en'
+            ? 'Example wishes — sign up to create your own collection'
+            : '示例愿望 · 注册后创建你自己的收藏'}
         </div>
 
-        <div className="wish-gallery" style={{ opacity: 0.75 }}>
+        <div className="wish-gallery">
           <div className="gallery-tile">
             <div className="gallery-thumb">
-              <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg">
-                <path d="M40 120 C 130 40, 240 190, 330 110 S 540 80, 680 130" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+              {/* Sailboat on calm water */}
+              <svg viewBox="0 0 160 120" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 92 Q 38 86 58 92 T 98 92 T 142 92" strokeWidth="2" opacity="0.5"/>
+                <path d="M24 101 Q 44 96 64 101 T 104 101 T 146 101" strokeWidth="2" opacity="0.32"/>
+                <path d="M50 83 Q 80 99 110 83"/>
+                <path d="M80 83 L 80 30"/>
+                <path d="M80 34 C 104 46 106 70 83 80"/>
+                <path d="M80 44 C 64 56 62 72 80 80" strokeWidth="2.4"/>
+                <path d="M80 30 L 94 27 L 80 24" strokeWidth="2"/>
+                <circle cx="132" cy="28" r="11" stroke="var(--wish)" strokeWidth="2.4"/>
+                <path d="M132 11 L132 6 M147 20 L151 17 M117 20 L113 17" stroke="var(--wish)" strokeWidth="2" opacity="0.7"/>
               </svg>
             </div>
             <div className="gallery-caption">
@@ -263,8 +256,14 @@ export default function HomePage() {
 
           <div className="gallery-tile">
             <div className="gallery-thumb">
-              <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg">
-                <path d="M110 190 C 200 150, 170 90, 260 80 S 340 140, 420 95 S 520 40, 610 85" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+              {/* Winding path over the hills toward a rising sun */}
+              <svg viewBox="0 0 160 120" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="112" cy="66" r="12" stroke="var(--wish)" strokeWidth="2.4"/>
+                <path d="M112 48 L112 43 M128 58 L132 55 M96 58 L92 55" stroke="var(--wish)" strokeWidth="2" opacity="0.7"/>
+                <path d="M16 80 Q 52 66 86 74 Q 118 81 148 68" strokeWidth="2.5"/>
+                <path d="M64 112 C 74 98 84 86 90 75"/>
+                <path d="M104 112 C 100 98 96 86 94 75"/>
+                <path d="M85 104 L 87 100 M89 92 L 91 88" strokeWidth="2" opacity="0.45"/>
               </svg>
             </div>
             <div className="gallery-caption">
@@ -275,9 +274,15 @@ export default function HomePage() {
 
           <div className="gallery-tile">
             <div className="gallery-thumb">
-              <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg">
-                <path d="M120 150 L 240 90 L 360 150" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M160 150 L160 185 L320 185 L320 150" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+              {/* Small house with a curl of smoke */}
+              <svg viewBox="0 0 160 120" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg">
+                <path d="M26 100 Q 80 94 134 100" strokeWidth="2" opacity="0.45"/>
+                <path d="M60 100 L 60 66 L 100 66 L 100 100"/>
+                <path d="M52 68 L 80 46 L 108 68"/>
+                <path d="M74 100 L 74 80 Q 80 75 86 80 L 86 100" strokeWidth="2.4"/>
+                <circle cx="92" cy="78" r="4" strokeWidth="2"/>
+                <path d="M92 54 L 92 40 L 100 40 L 100 60" strokeWidth="2.4"/>
+                <path d="M96 38 Q 88 30 96 24 Q 104 18 97 10" stroke="var(--wish)" strokeWidth="2" opacity="0.85"/>
               </svg>
             </div>
             <div className="gallery-caption">
@@ -288,8 +293,14 @@ export default function HomePage() {
 
           <div className="gallery-tile">
             <div className="gallery-thumb">
-              <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg">
-                <path d="M40 120 C 150 20, 260 210, 360 110 S 560 60, 680 140" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+              {/* A gently growing sprout */}
+              <svg viewBox="0 0 160 120" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg">
+                <path d="M52 102 Q 80 96 108 102" strokeWidth="2" opacity="0.45"/>
+                <path d="M80 102 C 78 86 82 70 80 54"/>
+                <path d="M80 84 C 62 82 54 68 72 68 C 78 68 80 76 80 84"/>
+                <path d="M80 72 C 98 68 106 54 88 54 C 82 54 80 62 80 72"/>
+                <path d="M80 54 C 72 51 70 43 78 44 C 80 44 80 49 80 54" stroke="var(--wish)" strokeWidth="2.4"/>
+                <path d="M80 54 C 88 51 90 43 82 44 C 80 44 80 49 80 54" stroke="var(--wish)" strokeWidth="2.4"/>
               </svg>
             </div>
             <div className="gallery-caption">

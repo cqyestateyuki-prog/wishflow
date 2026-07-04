@@ -47,7 +47,9 @@ export default function LoginPrompt({
     ? '登录后可以同步数据到云端，跨设备访问你的愿望。' 
     : 'Sign in to sync your wishes to the cloud and access from any device.';
 
-  // Inline variant - simple text with link
+  // Inline variant — one gentle sentence with an inline text link.
+  // Deliberately NOT a button: the nav already has a Sign In button, so a
+  // second button here reads as a redundant "sign in above sign in".
   if (variant === 'inline') {
     return (
       <div style={{
@@ -55,21 +57,15 @@ export default function LoginPrompt({
         background: 'rgba(230, 225, 240, 0.25)',
         borderRadius: 14,
         fontSize: 13,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 12,
-        flexWrap: 'wrap',
+        color: 'var(--text)',
+        lineHeight: 1.7,
       }}>
-        <span style={{ color: 'var(--text)' }}>
-          {message || defaultMessage}
-        </span>
-        <Link 
-          href="/login" 
-          className="btn"
-          style={{ padding: '6px 14px', fontSize: 12 }}
+        {message || defaultMessage}{' '}
+        <Link
+          href="/login"
+          style={{ color: 'var(--wish)', fontWeight: 600, textDecoration: 'underline' }}
         >
-          {language === 'zh' ? '登录' : 'Sign In'}
+          {language === 'zh' ? '登录 →' : 'Sign in →'}
         </Link>
       </div>
     );

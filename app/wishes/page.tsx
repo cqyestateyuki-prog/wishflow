@@ -146,8 +146,8 @@ export default function WishesPage() {
           <LoginPrompt
             variant="inline"
             message={language === 'zh'
-              ? '这些愿望已保存在本地。登录后可以同步到云端，跨设备继续使用。'
-              : 'These wishes are saved locally. Sign in to sync them across devices.'
+              ? '这些愿望安全地保存在这台设备上。想跨设备继续，可以'
+              : 'These wishes are kept safely on this device. To carry them across devices,'
             }
           />
         </div>
